@@ -1,11 +1,11 @@
 use crate::{Curve, Framebuffer, Rasterizer, Rect, SampleId, Segment, rasterize_each_with_bias};
 
-pub struct CoarseRasterizer;
+pub struct DistanceRasterizer;
 
-pub type CoarsePath = Vec<Curve>;
+pub type DistancePath = Vec<Curve>;
 
-impl Rasterizer for CoarseRasterizer {
-    type Path = CoarsePath;
+impl Rasterizer for DistanceRasterizer {
+    type Path = DistancePath;
 
     fn create_path(&mut self, segments: &[Segment]) -> Self::Path {
         let mut curves = Vec::new();
@@ -28,27 +28,38 @@ impl Rasterizer for CoarseRasterizer {
             (sample_id, framebuffer),
             rect,
             |pos_curve, dxdy| {
+                let mut distance = 1000.0f32;
+
                 let mut coverage = 0.0;
 
                 for curve in path {
                     match curve {
                         Curve::Line { p0, p1 } => {
-                            let p0 = *p0 - pos_curve;
-                            let p1 = *p1 - pos_curve;
+                            // TODO
 
-                            let sign_y = (p1.y() > 0.0) as i32 - (p0.y() > 0.0) as i32;
+                            let p0 = *p0;
+                            let p1 = *p1;
 
-                            if sign_y != 0 {
-                                let t = (0.0 - p0.y()) / (p1.y() - p0.y());
-                                let x = ((1.0 - t) * p0.x() + t * p1.x()) / dxdy.x();
-                                coverage += sign_y as f32 * (0.5 - x).min(1.0).max(0.0);
-                            }
+                            let sign_y = (p1.y() > p0.y()) as i32 - (p0.y() > p1.y()) as i32;
+
+                            let dir = p1 - p0;
+                            let dp = pos_curve - p0;
+                            let t = (dir.dot(dp) / dir.dot(dir)).min(1.0).max(0.0);
+                            let n = (dp - dir * t) / dxdy;
+                            let d = n.length() * n.x().signum();
+
+                            coverage += sign_y as f32 * (d).min(1.0).max(0.0);
+
+                            distance = distance.min(d);
                         }
                         Curve::Quad { .. } => todo!(),
                     }
                 }
 
+                // let coverage = (1.0 - distance).max(0.0) / dxdy.length();
+
                 coverage
-            });
+            },
+        );
     }
 }

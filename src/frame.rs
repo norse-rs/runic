@@ -19,13 +19,13 @@ impl Frame {
         }
     }
 
-    pub fn reconstruct(&mut self, filter: ReconstructionFilter, framebuffer: &Framebuffer) {
+    pub fn reconstruct(&mut self, _filter: ReconstructionFilter, framebuffer: &Framebuffer) {
         assert_eq!(self.width, framebuffer.width);
         assert_eq!(self.height, framebuffer.height);
         assert!(framebuffer.is_complete());
 
         let layer_size = self.width * self.height;
-        for (sample_id, sample_pos) in framebuffer.sample_pos.iter().enumerate() {
+        for (sample_id, _sample_pos) in framebuffer.sample_pos.iter().enumerate() {
             for i in 0..layer_size as usize {
                 let id = sample_id * layer_size as usize + i;
                 let sample = framebuffer.samples[id];
