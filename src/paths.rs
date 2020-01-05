@@ -75,7 +75,3 @@ impl Curve {
         }
     }
 }
-
-pub fn line_eval(p0: f32, p1: f32, t: f32) -> f32 {
-    (1.0 - t) * p0 + t * p1
-}

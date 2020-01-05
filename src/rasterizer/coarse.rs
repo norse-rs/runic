@@ -1,5 +1,6 @@
 use crate::{
-    line_eval, rasterize_each_with_bias, Curve, Framebuffer, Rasterizer, Rect, SampleId, Segment,
+    rasterize_each_with_bias, Curve, Framebuffer, Rasterizer, Rect, SampleId, Segment,
+    math::*
 };
 
 pub struct CoarseRasterizer;
@@ -39,9 +40,10 @@ impl Rasterizer for CoarseRasterizer {
                             let sign_y = (p1.y() > 0.0) as i32 - (p0.y() > 0.0) as i32;
 
                             if sign_y != 0 {
-                                let t = (0.0 - p0.y()) / (p1.y() - p0.y());
-                                let x = line_eval(p0.x(), p1.x(), t) / dxdy.x();
-                                coverage += sign_y as f32 * (0.5 - x).min(1.0).max(0.0);
+                                let tx = line_raycast(p0.y(), p1.y(), 0.0); // raycast x direction at sample pos
+                                let dx = line_eval(p0.x(), p1.x(), tx) / dxdy.x(); // get y value at ray intersection
+                                let t = box_1d(-dx, -0.5, 0.5);
+                                coverage += sign_y as f32 * t;
                             }
                         }
                         Curve::Quad { .. } => todo!(),

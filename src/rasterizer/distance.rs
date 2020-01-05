@@ -1,4 +1,4 @@
-use crate::{rasterize_each_with_bias, Curve, Framebuffer, Rasterizer, Rect, SampleId, Segment};
+use crate::{rasterize_each_with_bias, Curve, Framebuffer, Rasterizer, Rect, SampleId, Segment, math::*};
 
 pub struct DistanceRasterizer;
 
@@ -42,13 +42,13 @@ impl Rasterizer for DistanceRasterizer {
                             let n = (dp - dir * t) / dxdy;
                             let d = n.length() * n.x().signum();
 
-                            coverage -= sign_y as f32 * (0.5 - d).min(1.0).max(0.0);
+                            coverage -= sign_y as f32 * box_1d(-d, -0.5, 0.5);
                         }
                         Curve::Quad { .. } => todo!(),
                     }
                 }
 
-                coverage.abs()
+                coverage
             },
         );
     }

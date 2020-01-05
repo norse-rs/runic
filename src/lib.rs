@@ -2,87 +2,121 @@ mod frame;
 mod paths;
 mod rasterizer;
 mod sample;
+mod rect;
+mod polynomial;
+mod math;
 
 pub use crate::frame::*;
 pub use crate::paths::*;
 pub use crate::rasterizer::*;
 pub use crate::sample::*;
+pub use crate::rect::*;
+pub use crate::polynomial::*;
+pub use minifb::*;
 
-pub type Offset = glam::Vec2;
-pub type Extent = glam::Vec2;
+pub type Scene = fn(&mut dyn Rasterizer, &mut Framebuffer);
 
-#[derive(Copy, Clone, Debug)]
-pub struct Rect {
-    pub offset_local: Offset,
-    pub extent_local: Extent,
-    pub offset_curve: Offset,
-    pub extent_curve: Extent,
+pub struct App {
+    width: u32,
+    height: u32,
+    frame: Frame,
+    framebuffer: Framebuffer,
+    window: Window,
+    rasterizers: Vec<(Key, Box<dyn Rasterizer>)>,
+    active_rasterizer: Option<usize>,
+    scenes: Vec<(Key, Scene)>,
+    active_scene: Option<usize>,
 }
 
-impl Rect {
-    pub fn local_to_curve(&self, local: glam::Vec2) -> glam::Vec2 {
-        let tx = if self.extent_local.x().abs() > 0.0 {
-            (local.x() - self.offset_local.x()) / self.extent_local.x()
-        } else {
-            0.0
-        };
+impl App {
+    pub fn new(width: u32, height: u32, scale: Scale) -> Self {
+        let frame = Frame::new(width, height);
+        let framebuffer = Framebuffer::new(width, height);
 
-        let ty = if self.extent_local.y().abs() > 0.0 {
-            (local.y() - self.offset_local.y()) / self.extent_local.y()
-        } else {
-            0.0
-        };
-
-        glam::vec2(
-            self.offset_curve.x() + tx * self.extent_curve.x(),
-            self.offset_curve.y() + ty * self.extent_curve.y(),
+        let mut window = Window::new(
+            "furu",
+            width as _,
+            height as _,
+            WindowOptions {
+                borderless: false,
+                title: true,
+                resize: false,
+                scale,
+                scale_mode: ScaleMode::AspectRatioStretch,
+            },
         )
+        .unwrap();
+
+        window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
+
+        App {
+            width,
+            height,
+            frame,
+            framebuffer,
+            window,
+            rasterizers: Vec::new(),
+            active_rasterizer: None,
+            scenes: Vec::new(),
+            active_scene: None,
+        }
     }
 
-    pub fn curve_dxdy(&self) -> glam::Vec2 {
-        let tx = if self.extent_local.x().abs() > 0.0 {
-            1.0 / self.extent_local.x()
-        } else {
-            1.0
-        };
+    pub fn add_rasterizer<R: Rasterizer + 'static>(&mut self, key: Key, rasterizer: R) {
+        if self.active_rasterizer.is_none() {
+            self.active_rasterizer = Some(self.rasterizers.len());
+        }
 
-        let ty = if self.extent_local.y().abs() > 0.0 {
-            1.0 / self.extent_local.y()
-        } else {
-            1.0
-        };
-
-        glam::vec2(tx * self.extent_curve.x(), ty * self.extent_curve.y())
-    }
-}
-
-pub struct FillRect {
-    pub x0: u32,
-    pub x1: u32,
-    pub y0: u32,
-    pub y1: u32,
-}
-
-impl FillRect {
-    pub fn new(offset: Offset, extent: Extent, bound_x: u32, bound_y: u32) -> Self {
-        Self::new_with_bias((0.0, 0.0), offset, extent, bound_x, bound_y)
+        self.rasterizers.push((key, Box::new(rasterizer)));
     }
 
-    pub fn new_with_bias(
-        (bias_x, bias_y): (f32, f32),
-        offset: Offset,
-        extent: Extent,
-        bound_x: u32,
-        bound_y: u32,
-    ) -> Self {
-        let p0 = offset;
-        let p1 = extent + offset;
+    pub fn add_scene(&mut self, key: Key, scene: Scene) {
+        if self.active_scene.is_none() {
+            self.active_scene = Some(self.scenes.len());
+        }
 
-        let x0 = ((p0.x() - bias_x).floor().max(0.0) as u32).min(bound_x);
-        let y0 = ((p0.y() - bias_y).floor().max(0.0) as u32).min(bound_y);
-        let x1 = ((p1.x() + bias_x).ceil().max(0.0) as u32).min(bound_x);
-        let y1 = ((p1.y() + bias_y).ceil().max(0.0) as u32).min(bound_y);
+        self.scenes.push((key, scene));
+    }
 
-        FillRect { x0, x1, y0, y1 }
+    fn update_frame(&mut self) {
+        match (self.active_rasterizer, self.active_scene) {
+            (Some(rasterizer_id), Some(scene_id)) => {
+                let rasterizer = &mut self.rasterizers[rasterizer_id].1;
+                let scene = &mut self.scenes[scene_id].1;
+
+                self.framebuffer.reset();
+                scene(&mut **rasterizer, &mut self.framebuffer);
+                self.frame.reconstruct(ReconstructionFilter::Box, &mut self.framebuffer);
+            }
+            _ => (),
+        }
+    }
+
+    pub fn run(&mut self) {
+        // first frame!
+        self.update_frame();
+
+        while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
+            self.window.get_keys_pressed(minifb::KeyRepeat::No).map(|keys| {
+                for k in keys {
+                    for (i, (key, _)) in self.rasterizers.iter().enumerate() {
+                        if *key == k {
+                            self.active_rasterizer = Some(i);
+                        }
+                    }
+                    for (i, (key, _)) in self.scenes.iter().enumerate() {
+                        if *key == k {
+                            self.active_scene = Some(i);
+                        }
+                    }
+                }
+
+                self.update_frame();
+            });
+
+            self.window
+                .update_with_buffer(&self.frame.data, self.width as _, self.height as _)
+                .unwrap();
+        }
     }
 }
