@@ -1,4 +1,6 @@
-use crate::{Curve, Framebuffer, Rasterizer, Rect, SampleId, Segment, rasterize_each_with_bias};
+use crate::{
+    line_eval, rasterize_each_with_bias, Curve, Framebuffer, Rasterizer, Rect, SampleId, Segment,
+};
 
 pub struct CoarseRasterizer;
 
@@ -40,7 +42,7 @@ impl Rasterizer for CoarseRasterizer {
 
                             if sign_y != 0 {
                                 let t = (0.0 - p0.y()) / (p1.y() - p0.y());
-                                let x = ((1.0 - t) * p0.x() + t * p1.x()) / dxdy.x();
+                                let x = line_eval(p0.x(), p1.x(), t) / dxdy.x();
                                 coverage += sign_y as f32 * (0.5 - x).min(1.0).max(0.0);
                             }
                         }
@@ -48,7 +50,8 @@ impl Rasterizer for CoarseRasterizer {
                     }
                 }
 
-                coverage
-            });
+                coverage.abs()
+            },
+        );
     }
 }

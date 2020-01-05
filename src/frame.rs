@@ -57,8 +57,13 @@ impl Framebuffer {
         }
     }
 
+    pub fn reset(&mut self) {
+        self.sample_pos.clear();
+        self.samples.clear();
+    }
+
     pub fn clear(&mut self) {
-        todo!()
+        self.samples.clear();
     }
 
     pub fn add_samples_pos(&mut self, position: glam::Vec2) {
