@@ -4,12 +4,10 @@ use crate::{
 
 pub struct CoarseRasterizer;
 
-pub type CoarsePath = Vec<Curve>;
-
 impl Rasterizer for CoarseRasterizer {
-    type Path = CoarsePath;
+    fn name(&self) -> &'static str { "CoarseRasterizer" }
 
-    fn create_path(&mut self, segments: &[Segment]) -> Self::Path {
+    fn create_path(&mut self, segments: &[Segment]) -> Vec<Curve> {
         let mut curves = Vec::new();
         for segment in segments {
             for curve in segment {
@@ -23,7 +21,7 @@ impl Rasterizer for CoarseRasterizer {
         &mut self,
         (sample_id, framebuffer): (SampleId, &mut Framebuffer),
         rect: Rect,
-        path: &Self::Path,
+        path: &[Curve],
     ) {
         rasterize_each_with_bias(
             (1.0, 1.0),

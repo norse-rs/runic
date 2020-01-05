@@ -4,12 +4,12 @@ mod distance;
 pub use coarse::*;
 pub use distance::*;
 
-use crate::{Extent, FillRect, Framebuffer, Offset, Rect, SampleId, Segment};
+use crate::{Extent, FillRect, Framebuffer, Offset, Rect, SampleId, Segment, Curve};
 
 pub trait Rasterizer {
-    type Path;
+    fn name(&self) -> &'static str;
 
-    fn create_path(&mut self, segments: &[Segment]) -> Self::Path;
+    fn create_path(&mut self, segments: &[Segment]) -> Vec<Curve>;
 
     fn cmd_fill(
         &mut self,
@@ -29,7 +29,7 @@ pub trait Rasterizer {
         }
     }
 
-    fn cmd_draw(&mut self, frame: (SampleId, &mut Framebuffer), rect: Rect, path: &Self::Path);
+    fn cmd_draw(&mut self, frame: (SampleId, &mut Framebuffer), rect: Rect, path: &[Curve]);
 }
 
 pub(crate) fn rasterize_each_with_bias<F>(

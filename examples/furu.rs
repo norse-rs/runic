@@ -4,7 +4,63 @@ use runic::Rasterizer;
 const WIDTH: u32 = 640;
 const HEIGHT: u32 = 360;
 
-fn render_scene0<R: Rasterizer>(rasterizer: &mut R, framebuffer: &mut runic::Framebuffer) {
+fn main() {
+    let mut frame = runic::Frame::new(WIDTH, HEIGHT);
+    let mut framebuffer = runic::Framebuffer::new(WIDTH, HEIGHT);
+
+    let mut window = Window::new(
+        "furu",
+        WIDTH as _,
+        HEIGHT as _,
+        WindowOptions {
+            borderless: false,
+            title: true,
+            resize: false,
+            scale: minifb::Scale::X2,
+            scale_mode: minifb::ScaleMode::AspectRatioStretch,
+        },
+    )
+    .unwrap_or_else(|e| {
+        panic!("{}", e);
+    });
+
+    window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
+
+    // Default
+    let mut rasterizer: Box<dyn Rasterizer> = Box::new(runic::CoarseRasterizer {});
+
+    let scene = Box::new(|window: &mut minifb::Window, rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Framebuffer| {
+        render_scene0(rasterizer, framebuffer);
+        window.set_title(&format!("0 - {}", rasterizer.name()));
+    });
+
+    frame.reconstruct(runic::ReconstructionFilter::Box, &mut framebuffer);
+
+    while window.is_open() && !window.is_key_down(Key::Escape) {
+        window.get_keys_pressed(minifb::KeyRepeat::No).map(|keys| {
+            for k in keys {
+                match k {
+                    minifb::Key::F1 => {
+                        rasterizer = Box::new(runic::CoarseRasterizer {});
+                    },
+                    minifb::Key::F2 => {
+                        rasterizer = Box::new(runic::DistanceRasterizer {});
+                    },
+                    _ => (),
+                }
+            }
+
+            scene(&mut window, &mut *rasterizer, &mut framebuffer);
+            frame.reconstruct(runic::ReconstructionFilter::Box, &mut framebuffer);
+        });
+
+        window
+            .update_with_buffer(&frame.data, WIDTH as _, HEIGHT as _)
+            .unwrap();
+    }
+}
+
+fn render_scene0(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Framebuffer) {
     // scene geometry
     let segments_triangle0 = vec![vec![
         runic::Curve::Line {
@@ -24,16 +80,16 @@ fn render_scene0<R: Rasterizer>(rasterizer: &mut R, framebuffer: &mut runic::Fra
 
     let segments_triangle1 = vec![vec![
         runic::Curve::Line {
-            p0: glam::Vec2::new(50.0, 0.0),
-            p1: glam::Vec2::new(0.0, 80.0),
+            p0: glam::Vec2::new(25.0, 0.0),
+            p1: glam::Vec2::new(0.0, 100.0),
         },
         runic::Curve::Line {
-            p0: glam::Vec2::new(0.0, 80.0),
-            p1: glam::Vec2::new(25.0, 100.0),
+            p0: glam::Vec2::new(0.0, 100.0),
+            p1: glam::Vec2::new(50.0, 100.0),
         },
         runic::Curve::Line {
-            p0: glam::Vec2::new(25.0, 100.0),
-            p1: glam::Vec2::new(50.0, 0.0),
+            p0: glam::Vec2::new(50.0, 100.0),
+            p1: glam::Vec2::new(25.0, 0.0),
         },
     ]];
     let aabb_triangle1 = runic::Aabb::from_segments(&segments_triangle1);
@@ -75,59 +131,5 @@ fn render_scene0<R: Rasterizer>(rasterizer: &mut R, framebuffer: &mut runic::Fra
             },
             &path_triangle1,
         );
-    }
-}
-
-fn main() {
-    let mut frame = runic::Frame::new(WIDTH, HEIGHT);
-    let mut framebuffer = runic::Framebuffer::new(WIDTH, HEIGHT);
-
-    let mut window = Window::new(
-        "0 - CoarseRasterizer",
-        WIDTH as _,
-        HEIGHT as _,
-        WindowOptions {
-            borderless: false,
-            title: true,
-            resize: false,
-            scale: minifb::Scale::X1,
-            scale_mode: minifb::ScaleMode::AspectRatioStretch,
-        },
-    )
-    .unwrap_or_else(|e| {
-        panic!("{}", e);
-    });
-
-    window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
-
-    // Default
-    let mut rasterizer = runic::CoarseRasterizer {};
-    render_scene0(&mut rasterizer, &mut framebuffer);
-    frame.reconstruct(runic::ReconstructionFilter::Box, &mut framebuffer);
-
-    while window.is_open() && !window.is_key_down(Key::Escape) {
-        window.get_keys_pressed(minifb::KeyRepeat::No).map(|keys| {
-            for k in keys {
-                match k {
-                    minifb::Key::F1 => {
-                        window.set_title("0 - CoarseRasterizer");
-                        let mut rasterizer = runic::CoarseRasterizer {};
-                        render_scene0(&mut rasterizer, &mut framebuffer);
-                    },
-                    minifb::Key::F2 => {
-                        window.set_title("0 - DistanceRasterizer");
-                        let mut rasterizer = runic::DistanceRasterizer {};
-                        render_scene0(&mut rasterizer, &mut framebuffer);
-                    },
-                    _ => (),
-                }
-            }
-
-            frame.reconstruct(runic::ReconstructionFilter::Box, &mut framebuffer);
-        });
-
-        window
-            .update_with_buffer(&frame.data, WIDTH as _, HEIGHT as _)
-            .unwrap();
     }
 }
