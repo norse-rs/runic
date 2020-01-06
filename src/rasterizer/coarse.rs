@@ -1,12 +1,14 @@
 use crate::{
-    rasterize_each_with_bias, Curve, Framebuffer, Rasterizer, Rect, SampleId, Segment,
-    math::*
+    math::*, rasterize_each_with_bias, BoxFilter, Curve, Framebuffer, Rasterizer, Rect, SampleId,
+    Segment,
 };
 
 pub struct CoarseRasterizer;
 
 impl Rasterizer for CoarseRasterizer {
-    fn name(&self) -> &'static str { "CoarseRasterizer" }
+    fn name(&self) -> &'static str {
+        "CoarseRasterizer"
+    }
 
     fn create_path(&mut self, segments: &[Segment]) -> Vec<Curve> {
         let mut curves = Vec::new();
@@ -24,6 +26,8 @@ impl Rasterizer for CoarseRasterizer {
         rect: Rect,
         path: &[Curve],
     ) {
+        let filter = BoxFilter::new(-0.5, 0.5);
+
         rasterize_each_with_bias(
             (1.0, 1.0),
             (sample_id, framebuffer),
@@ -42,7 +46,7 @@ impl Rasterizer for CoarseRasterizer {
                             if sign_y != 0 {
                                 let tx = line_raycast(p0.y(), p1.y(), 0.0); // raycast x direction at sample pos
                                 let dx = line_eval(p0.x(), p1.x(), tx) / dxdy.x(); // get y value at ray intersection
-                                let t = box_1d(-dx, -0.5, 0.5);
+                                let t = filter.cdf(-dx);
                                 coverage += sign_y as f32 * t;
                             }
                         }

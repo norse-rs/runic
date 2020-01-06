@@ -5,9 +5,7 @@ pub struct Polynomial {
 
 impl Polynomial {
     pub fn new(coeffs: Vec<f32>) -> Self {
-        Polynomial {
-            coeffs,
-        }
+        Polynomial { coeffs }
     }
 
     pub fn eval(&self, t: f32) -> f32 {
@@ -33,7 +31,7 @@ impl Polynomial {
 
     /// Parametric line
     pub fn line(p0: f32, p1: f32) -> Self {
-        Polynomial::new(vec![p1-p0, p0])
+        Polynomial::new(vec![p1 - p0, p0])
     }
 
     pub fn mul(&self, rhs: &Polynomial) -> Self {
@@ -100,16 +98,28 @@ mod test {
     #[test]
     fn integral() {
         // 1 /-> x
-        assert_eq!(Polynomial::new(vec![1.0]).integral(), Polynomial::new(vec![0.0, 1.0]));
+        assert_eq!(
+            Polynomial::new(vec![1.0]).integral(),
+            Polynomial::new(vec![0.0, 1.0])
+        );
         // 1 + x /-> x + 0.5 * x^2
-        assert_eq!(Polynomial::new(vec![1.0, 1.0]).integral(), Polynomial::new(vec![0.0, 1.0, 0.5]));
+        assert_eq!(
+            Polynomial::new(vec![1.0, 1.0]).integral(),
+            Polynomial::new(vec![0.0, 1.0, 0.5])
+        );
     }
 
     #[test]
     fn compose() {
         // x(x) /-> x
-        assert_eq!(Polynomial::new(vec![0.0, 1.0]).compose(&Polynomial::new(vec![0.0, 1.0])), Polynomial::new(vec![0.0, 1.0]));
+        assert_eq!(
+            Polynomial::new(vec![0.0, 1.0]).compose(&Polynomial::new(vec![0.0, 1.0])),
+            Polynomial::new(vec![0.0, 1.0])
+        );
         // x(x + 1) /-> x + 1
-        assert_eq!(Polynomial::new(vec![0.0, 1.0]).compose(&Polynomial::new(vec![1.0, 1.0])), Polynomial::new(vec![1.0, 1.0]));
+        assert_eq!(
+            Polynomial::new(vec![0.0, 1.0]).compose(&Polynomial::new(vec![1.0, 1.0])),
+            Polynomial::new(vec![1.0, 1.0])
+        );
     }
 }

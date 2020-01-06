@@ -98,13 +98,19 @@ impl PathBuilder {
     }
 
     pub fn line_to(mut self, p: glam::Vec2) -> Self {
-        self.curves.push(Curve::Line { p0: self.last, p1: p });
+        self.curves.push(Curve::Line {
+            p0: self.last,
+            p1: p,
+        });
         self.last = p;
         self
     }
 
     pub fn close(mut self) -> Self {
-        self.curves.push(Curve::Line { p0: self.last, p1: self.first });
+        self.curves.push(Curve::Line {
+            p0: self.last,
+            p1: self.first,
+        });
         self.last = self.first;
         self
     }

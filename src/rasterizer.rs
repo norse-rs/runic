@@ -4,7 +4,7 @@ mod distance;
 pub use coarse::*;
 pub use distance::*;
 
-use crate::{Extent, FillRect, Framebuffer, Offset, Rect, SampleId, Segment, Curve};
+use crate::{Curve, Extent, FillRect, Framebuffer, Offset, Rect, SampleId, Segment};
 
 pub trait Rasterizer {
     fn name(&self) -> &'static str;
