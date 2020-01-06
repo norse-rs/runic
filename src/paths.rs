@@ -75,3 +75,41 @@ impl Curve {
         }
     }
 }
+
+pub struct PathBuilder {
+    curves: Vec<Curve>,
+    first: glam::Vec2,
+    last: glam::Vec2,
+}
+
+impl PathBuilder {
+    pub fn new() -> Self {
+        PathBuilder {
+            curves: Vec::new(),
+            first: glam::vec2(0.0, 0.0),
+            last: glam::vec2(0.0, 0.0),
+        }
+    }
+
+    pub fn move_to(mut self, p: glam::Vec2) -> Self {
+        self.first = p;
+        self.last = p;
+        self
+    }
+
+    pub fn line_to(mut self, p: glam::Vec2) -> Self {
+        self.curves.push(Curve::Line { p0: self.last, p1: p });
+        self.last = p;
+        self
+    }
+
+    pub fn close(mut self) -> Self {
+        self.curves.push(Curve::Line { p0: self.last, p1: self.first });
+        self.last = self.first;
+        self
+    }
+
+    pub fn finish(self) -> Vec<Curve> {
+        self.curves
+    }
+}

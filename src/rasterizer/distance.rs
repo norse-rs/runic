@@ -42,7 +42,7 @@ impl Rasterizer for DistanceRasterizer {
                             let n = (dp - dir * t) / dxdy;
                             let d = n.length() * n.x().signum();
 
-                            coverage -= sign_y as f32 * box_1d(-d, -0.5, 0.5);
+                            coverage -= sign_y as f32 * box_1d(-d, -0.7, 0.7);
                         }
                         Curve::Quad { .. } => todo!(),
                     }

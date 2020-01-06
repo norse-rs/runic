@@ -16,36 +16,24 @@ fn main() {
 
 fn render_scene0(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Framebuffer) {
     // scene geometry
-    let segments_triangle0 = vec![vec![
-        runic::Curve::Line {
-            p0: glam::Vec2::new(0.0, 0.0),
-            p1: glam::Vec2::new(25.0, 100.0),
-        },
-        runic::Curve::Line {
-            p0: glam::Vec2::new(25.0, 100.0),
-            p1: glam::Vec2::new(50.0, 80.0),
-        },
-        runic::Curve::Line {
-            p0: glam::Vec2::new(50.0, 80.0),
-            p1: glam::Vec2::new(0.0, 0.0),
-        },
-    ]];
+    let segments_triangle0 = vec![
+        runic::PathBuilder::new()
+            .move_to(glam::vec2(0.0, 0.0))
+            .line_to(glam::vec2(25.0, 100.0))
+            .line_to(glam::vec2(50.0, 80.0))
+            .close()
+            .finish(),
+    ];
     let aabb_triangle0 = runic::Aabb::from_segments(&segments_triangle0);
 
-    let segments_triangle1 = vec![vec![
-        runic::Curve::Line {
-            p0: glam::Vec2::new(25.0, 0.0),
-            p1: glam::Vec2::new(0.0, 100.0),
-        },
-        runic::Curve::Line {
-            p0: glam::Vec2::new(0.0, 100.0),
-            p1: glam::Vec2::new(50.0, 100.0),
-        },
-        runic::Curve::Line {
-            p0: glam::Vec2::new(50.0, 100.0),
-            p1: glam::Vec2::new(25.0, 0.0),
-        },
-    ]];
+    let segments_triangle1 = vec![
+        runic::PathBuilder::new()
+            .move_to(glam::vec2(25.0, 0.0))
+            .line_to(glam::vec2(0.0, 100.0))
+            .line_to(glam::vec2(50.0, 100.0))
+            .close()
+            .finish(),
+    ];
     let aabb_triangle1 = runic::Aabb::from_segments(&segments_triangle1);
 
     // prepare film
