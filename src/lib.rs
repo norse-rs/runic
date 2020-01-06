@@ -89,7 +89,9 @@ impl App {
                 self.framebuffer.reset();
                 scene(&mut **rasterizer, &mut self.framebuffer);
                 self.frame
-                    .reconstruct(ReconstructionFilter::Box, &mut self.framebuffer);
+                    .reconstruct(&mut self.framebuffer);
+
+                self.window.set_title(&format!("{} - Scene {}", rasterizer.name(), scene_id));
             }
             _ => (),
         }
@@ -103,6 +105,10 @@ impl App {
             self.window
                 .get_keys_pressed(minifb::KeyRepeat::No)
                 .map(|keys| {
+                    if keys.is_empty() {
+                        return;
+                    }
+
                     for k in keys {
                         for (i, (key, _)) in self.rasterizers.iter().enumerate() {
                             if *key == k {

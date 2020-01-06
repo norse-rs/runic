@@ -1,8 +1,4 @@
-use crate::sample::SampleId;
-
-pub enum ReconstructionFilter {
-    Box,
-}
+use crate::{BoxFilter, Filter, SampleId};
 
 pub struct Frame {
     pub width: u32,
@@ -19,24 +15,53 @@ impl Frame {
         }
     }
 
-    pub fn reconstruct(&mut self, _filter: ReconstructionFilter, framebuffer: &Framebuffer) {
+    pub fn reconstruct(&mut self, framebuffer: &Framebuffer) {
         assert_eq!(self.width, framebuffer.width);
         assert_eq!(self.height, framebuffer.height);
         assert!(framebuffer.is_complete());
 
-        let layer_size = self.width * self.height;
-        for (sample_id, _sample_pos) in framebuffer.sample_pos.iter().enumerate() {
-            for i in 0..layer_size as usize {
-                let id = sample_id * layer_size as usize + i;
-                let sample = framebuffer.samples[id];
+        let filter = BoxFilter::new(0.0, 1.0); // TODO
+        let relative_bounds = filter.relative_bounds((0.0, 0.0));
 
-                // TODO
-                let clamped_sample = sample.min(1.0).max(0.0);
-                let contribution = (std::u8::MAX as f64 * clamped_sample as f64) as u32;
-                self.data[i] =
-                    0xFF << 24 | contribution << 16 | contribution << 8 | contribution << 0;
+        let layer_size = self.width * self.height;
+        for y in 0..self.height {
+            for x in 0..self.width {
+                let mut acc_sample = 0.0;
+                let mut acc_weight = 0.0;
+
+                let bounds = relative_bounds.offset(x, y, self.width, self.height);
+                for (sample_id, sample_pos) in framebuffer.sample_pos.iter().enumerate() {
+                    for iy in bounds.y.clone() {
+                        for ix in bounds.x.clone() {
+                            let id = sample_id * layer_size as usize + (iy * self.width + ix) as usize;
+                            let sample = framebuffer.samples[id];
+
+                            let clamped_sample = sample.min(1.0).max(0.0);
+
+                            let dx = ix as i32 - x as i32;
+                            let dy = iy as i32 - y as i32;
+                            let weight = filter.pdf(sample_pos.x() + dx as f32) * filter.pdf(sample_pos.y() + dy as f32); // 2d separable filter
+
+                            acc_sample += clamped_sample * weight;
+                            acc_weight += weight;
+                        }
+                    }
+                }
+
+                let coverage = if acc_weight > 0.0 {
+                    acc_sample / acc_weight
+                } else {
+                    0.0
+                };
+
+                let value = (std::u8::MAX as f64 * coverage as f64) as u32;
+                let i = y * self.width + x;
+                self.data[i as usize] =
+                    0xFF << 24 | value << 16 | value << 8 | value << 0;
             }
         }
+
+        println!("reconstructed");
     }
 }
 

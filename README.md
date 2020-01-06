@@ -12,4 +12,5 @@ cargo run --example furu
 #### Keys
 - `F1` - Coarse rasterizer (box filter)
 - `F2` - Distance rasterizer (box filter)
+- `F3` - Coarse rasterizer (Heaviside filter)
 - `1` - Default scene (band test and two triangles)

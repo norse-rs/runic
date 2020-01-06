@@ -7,7 +7,7 @@ pub use distance::*;
 use crate::{Curve, Extent, FillRect, Framebuffer, Offset, Rect, SampleId, Segment};
 
 pub trait Rasterizer {
-    fn name(&self) -> &'static str;
+    fn name(&self) -> String;
 
     fn create_path(&mut self, segments: &[Segment]) -> Vec<Curve>;
 

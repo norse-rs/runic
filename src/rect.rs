@@ -68,10 +68,10 @@ impl FillRect {
         let p0 = offset;
         let p1 = extent + offset;
 
-        let x0 = ((p0.x() - bias_x).floor().max(0.0) as u32).min(bound_x);
-        let y0 = ((p0.y() - bias_y).floor().max(0.0) as u32).min(bound_y);
-        let x1 = ((p1.x() + bias_x).ceil().max(0.0) as u32).min(bound_x);
-        let y1 = ((p1.y() + bias_y).ceil().max(0.0) as u32).min(bound_y);
+        let x0 = ((p0.x() - bias_x).floor().max(0.0) as u32).min(bound_x - 1);
+        let y0 = ((p0.y() - bias_y).floor().max(0.0) as u32).min(bound_y - 1);
+        let x1 = ((p1.x() + bias_x).ceil().max(0.0) as u32).min(bound_x - 1);
+        let y1 = ((p1.y() + bias_y).ceil().max(0.0) as u32).min(bound_y - 1);
 
         FillRect { x0, x1, y0, y1 }
     }

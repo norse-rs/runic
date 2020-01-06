@@ -6,8 +6,9 @@ const HEIGHT: u32 = 360;
 fn main() {
     let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X1);
 
-    app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer {});
+    app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { filter: runic::BoxFilter::new(-0.5, 0.5) });
     app.add_rasterizer(runic::Key::F2, runic::DistanceRasterizer {});
+    app.add_rasterizer(runic::Key::F3, runic::CoarseRasterizer { filter: runic::StepFilter });
 
     app.add_scene(runic::Key::Key1, render_scene0);
 
