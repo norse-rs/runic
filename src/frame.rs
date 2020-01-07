@@ -1,4 +1,4 @@
-use crate::{BoxFilter, Filter, SampleId};
+use crate::{BoxFilter, LanzcosFilter, Filter, SampleId, math::*};
 
 pub struct Frame {
     pub width: u32,
@@ -15,13 +15,12 @@ impl Frame {
         }
     }
 
-    pub fn reconstruct(&mut self, framebuffer: &Framebuffer) {
+    pub fn reconstruct(&mut self, framebuffer: &Framebuffer, filter: & dyn Filter) {
         assert_eq!(self.width, framebuffer.width);
         assert_eq!(self.height, framebuffer.height);
         assert!(framebuffer.is_complete());
 
-        let filter = BoxFilter::new(0.0, 1.0); // TODO
-        let relative_bounds = filter.relative_bounds((0.0, 0.0));
+        let relative_bounds = filter.relative_bounds((0.5, 0.5));
 
         let layer_size = self.width * self.height;
         let num_samples = framebuffer.sample_pos.len();
@@ -43,7 +42,7 @@ impl Frame {
 
                             let dx = ix as i32 - x as i32;
                             let dy = iy as i32 - y as i32;
-                            let weight = filter.pdf(sample_pos.x() + dx as f32) * filter.pdf(sample_pos.y() + dy as f32); // 2d separable filter
+                            let weight = filter.pdf(sample_pos.x() - 0.5 + dx as f32) * filter.pdf(sample_pos.y() - 0.5 + dy as f32); // 2d separable filter
 
                             acc_sample += clamped_sample * weight;
                             acc_weight += weight;
@@ -52,7 +51,7 @@ impl Frame {
                 }
 
                 let coverage = if acc_weight > 0.0 {
-                    acc_sample / acc_weight
+                    clamp(acc_sample / acc_weight, 0.0, 1.0)
                 } else {
                     0.0
                 };

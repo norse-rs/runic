@@ -1,4 +1,4 @@
-use crate::Filter;
+use crate::{RelativeBounds, Filter};
 
 /// Heaviside
 pub struct StepFilter;
@@ -13,5 +13,9 @@ impl Filter for StepFilter {
 
     fn cdf(&self, x: f32) -> f32 {
         if x < 0.0 { 0.0 } else { 1.0 }
+    }
+
+    fn relative_bounds(&self, (x, y): (f32, f32)) -> RelativeBounds {
+        todo!()
     }
 }

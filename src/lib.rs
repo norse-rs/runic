@@ -24,10 +24,14 @@ pub struct App {
     frame: Frame,
     framebuffer: Framebuffer,
     window: Window,
+
     rasterizers: Vec<(Key, Box<dyn Rasterizer>, UniformSampler)>,
-    active_rasterizer: Option<usize>,
     scenes: Vec<(Key, Scene)>,
+    filters: Vec<(Key, Box<dyn Filter>)>,
+
+    active_rasterizer: Option<usize>,
     active_scene: Option<usize>,
+    active_filter: Option<usize>,
 }
 
 impl App {
@@ -61,6 +65,8 @@ impl App {
             active_rasterizer: None,
             scenes: Vec::new(),
             active_scene: None,
+            filters: Vec::new(),
+            active_filter: None,
         }
     }
 
@@ -80,11 +86,20 @@ impl App {
         self.scenes.push((key, scene));
     }
 
+    pub fn add_filter<F: Filter + 'static>(&mut self, key: Key, filter: F) {
+        if self.active_filter.is_none() {
+            self.active_filter = Some(self.filters.len());
+        }
+
+        self.filters.push((key, Box::new(filter)));
+    }
+
     fn update_frame(&mut self) {
-        match (self.active_rasterizer, self.active_scene) {
-            (Some(rasterizer_id), Some(scene_id)) => {
+        match (self.active_rasterizer, self.active_scene, self.active_filter) {
+            (Some(rasterizer_id), Some(scene_id), Some(filter_id)) => {
                 let (_, rasterizer, sampler) = &mut self.rasterizers[rasterizer_id];
                 let scene = &mut self.scenes[scene_id].1;
+                let filter = &self.filters[filter_id].1;
 
                 let start = std::time::Instant::now();
                 self.framebuffer.reset();
@@ -96,7 +111,7 @@ impl App {
 
                 print!("reconstruct frame..");
                 self.frame
-                    .reconstruct(&mut self.framebuffer);
+                    .reconstruct(&mut self.framebuffer, &**filter);
                 println!("{:?}", start.elapsed());
 
                 self.window.set_title(&format!("{} - Scene {}", rasterizer.name(), scene_id));
@@ -126,6 +141,11 @@ impl App {
                         for (i, (key, _)) in self.scenes.iter().enumerate() {
                             if *key == k {
                                 self.active_scene = Some(i);
+                            }
+                        }
+                        for (i, (key, _)) in self.filters.iter().enumerate() {
+                            if *key == k {
+                                self.active_filter = Some(i);
                             }
                         }
                     }

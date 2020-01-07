@@ -1,7 +1,7 @@
-use runic::Rasterizer;
+use runic::{Rasterizer, BoxFilter, LanzcosFilter};
 
-const WIDTH: u32 = 640;
-const HEIGHT: u32 = 360;
+const WIDTH: u32 = 480;
+const HEIGHT: u32 = 260;
 
 fn main() {
     let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X2);
@@ -12,6 +12,8 @@ fn main() {
     app.add_rasterizer(runic::Key::F4, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 8, ny: 8 });
 
     app.add_scene(runic::Key::Key1, render_scene0);
+
+    app.add_filter(runic::Key::N, BoxFilter::new(-0.5, 0.5));
 
     app.run();
 }
@@ -38,18 +40,10 @@ fn render_scene0(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
     let path_triangle0 = rasterizer.create_path(&segments_triangle0);
     let path_triangle1 = rasterizer.create_path(&segments_triangle1);
 
-    for i in 0..20 {
-        rasterizer.cmd_fill(
-            framebuffer,
-            glam::Vec2::new(50.0 + i as f32 * 25.0, 50.0),
-            glam::Vec2::new(25.0, 50.0),
-            (i + 1) as f32 * 0.05,
-        );
-    }
     rasterizer.cmd_draw(
         framebuffer,
         runic::Rect {
-            offset_local: glam::vec2(50.0, 120.0),
+            offset_local: glam::vec2(10.0, 10.0),
             extent_local: glam::vec2(100.0, 200.0),
             offset_curve: aabb_triangle0.min,
             extent_curve: aabb_triangle0.max - aabb_triangle0.min,
@@ -59,7 +53,7 @@ fn render_scene0(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
     rasterizer.cmd_draw(
         framebuffer,
         runic::Rect {
-            offset_local: glam::vec2(300.0, 120.0),
+            offset_local: glam::vec2(230.0, 10.0),
             extent_local: glam::vec2(100.0, 200.0),
             offset_curve: aabb_triangle1.min,
             extent_curve: aabb_triangle1.max - aabb_triangle1.min,
