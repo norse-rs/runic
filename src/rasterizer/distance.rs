@@ -22,7 +22,7 @@ impl Rasterizer for DistanceRasterizer {
 
     fn cmd_draw(
         &mut self,
-        (sample_id, framebuffer): (SampleId, &mut Framebuffer),
+        framebuffer: &mut Framebuffer,
         rect: Rect,
         path: &[Curve],
     ) {
@@ -30,7 +30,7 @@ impl Rasterizer for DistanceRasterizer {
 
         rasterize_each_with_bias(
             (1.0, 1.0),
-            (sample_id, framebuffer),
+            framebuffer,
             rect,
             |pos_curve, dxdy| {
                 let mut coverage = 0.0;

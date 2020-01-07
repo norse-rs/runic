@@ -24,7 +24,7 @@ pub struct App {
     frame: Frame,
     framebuffer: Framebuffer,
     window: Window,
-    rasterizers: Vec<(Key, Box<dyn Rasterizer>)>,
+    rasterizers: Vec<(Key, Box<dyn Rasterizer>, UniformSampler)>,
     active_rasterizer: Option<usize>,
     scenes: Vec<(Key, Scene)>,
     active_scene: Option<usize>,
@@ -64,12 +64,12 @@ impl App {
         }
     }
 
-    pub fn add_rasterizer<R: Rasterizer + 'static>(&mut self, key: Key, rasterizer: R) {
+    pub fn add_rasterizer<R: Rasterizer + 'static>(&mut self, key: Key, rasterizer: R, sampler: UniformSampler) {
         if self.active_rasterizer.is_none() {
             self.active_rasterizer = Some(self.rasterizers.len());
         }
 
-        self.rasterizers.push((key, Box::new(rasterizer)));
+        self.rasterizers.push((key, Box::new(rasterizer), sampler));
     }
 
     pub fn add_scene(&mut self, key: Key, scene: Scene) {
@@ -83,13 +83,21 @@ impl App {
     fn update_frame(&mut self) {
         match (self.active_rasterizer, self.active_scene) {
             (Some(rasterizer_id), Some(scene_id)) => {
-                let rasterizer = &mut self.rasterizers[rasterizer_id].1;
+                let (_, rasterizer, sampler) = &mut self.rasterizers[rasterizer_id];
                 let scene = &mut self.scenes[scene_id].1;
 
+                let start = std::time::Instant::now();
                 self.framebuffer.reset();
+                sampler.populate(&mut self.framebuffer);
+
+                print!("render scene..");
                 scene(&mut **rasterizer, &mut self.framebuffer);
+                println!("{:?}", start.elapsed());
+
+                print!("reconstruct frame..");
                 self.frame
                     .reconstruct(&mut self.framebuffer);
+                println!("{:?}", start.elapsed());
 
                 self.window.set_title(&format!("{} - Scene {}", rasterizer.name(), scene_id));
             }
@@ -110,7 +118,7 @@ impl App {
                     }
 
                     for k in keys {
-                        for (i, (key, _)) in self.rasterizers.iter().enumerate() {
+                        for (i, (key, _, _)) in self.rasterizers.iter().enumerate() {
                             if *key == k {
                                 self.active_rasterizer = Some(i);
                             }

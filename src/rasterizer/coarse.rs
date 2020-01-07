@@ -1,5 +1,5 @@
 use crate::{
-    math::*, rasterize_each_with_bias, BoxFilter, Curve, Framebuffer, Rasterizer, Rect, SampleId,
+    math::*, rasterize_each_with_bias, Curve, Framebuffer, Rasterizer, Rect, SampleId,
     Segment, Filter,
 };
 
@@ -24,13 +24,13 @@ impl<F: Filter> Rasterizer for CoarseRasterizer<F> {
 
     fn cmd_draw(
         &mut self,
-        (sample_id, framebuffer): (SampleId, &mut Framebuffer),
+        framebuffer: &mut Framebuffer,
         rect: Rect,
         path: &[Curve],
     ) {
         rasterize_each_with_bias(
             (1.0, 1.0),
-            (sample_id, framebuffer),
+            framebuffer,
             rect,
             |pos_curve, dxdy| {
                 let mut coverage = 0.0;
