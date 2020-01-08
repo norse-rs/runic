@@ -54,7 +54,7 @@ impl<F: Filter> Rasterizer for CoarseRasterizer<F> {
                     }
                 }
 
-                coverage.abs()
+                coverage
             },
         );
     }

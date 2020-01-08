@@ -57,7 +57,7 @@ impl Frame {
                 };
 
                 let value = (std::u8::MAX as f64 * coverage as f64) as u32;
-                let i = y * self.width + x;
+                let i = /* (self.height - y - 1)*/ y * self.width + x; // y -flip
                 self.data[i as usize] =
                     0xFF << 24 | value << 16 | value << 8 | value << 0;
             }

@@ -1,8 +1,10 @@
 mod coarse;
 mod distance;
+mod analytic_box;
 
 pub use coarse::*;
 pub use distance::*;
+pub use analytic_box::*;
 
 use crate::{Curve, Extent, FillRect, Framebuffer, Offset, Rect, SampleId, Segment};
 
