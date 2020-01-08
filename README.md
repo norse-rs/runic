@@ -16,6 +16,9 @@ cargo run --example furu --release
 - `F5` - Analytic rasterizer (box filter)
 - `1` - Default scene (two triangles)
 
+#### Skia Reference
+<a href='https://fiddle.skia.org/c/25d2497967fe0301c9bf09d2bba22b16'><img src='https://fiddle.skia.org/i/25d2497967fe0301c9bf09d2bba22b16_raster.png'></a>
+
 ```
 cargo run --example filters --release
 ```
