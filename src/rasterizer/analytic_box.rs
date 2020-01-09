@@ -86,6 +86,8 @@ impl Rasterizer for AnalyticBoxRasterizer {
             |pos_curve, dxdy| {
                 let mut coverage = 0.0;
 
+                assert_eq!(dxdy, glam::vec2(1.0, 1.0)); // TODO
+
                 for curve in path {
                     match curve {
                         Curve::Line { p0, p1 } => {
@@ -95,28 +97,32 @@ impl Rasterizer for AnalyticBoxRasterizer {
                             let sign_x = (p1.x() > p0.x()) as i32 - (p0.x() > p1.x()) as i32;
                             let sign_y = (p1.y() > p0.y()) as i32 - (p0.y() > p1.y()) as i32;
 
+                            let hit = (p1.x() > pos_curve.x()) as i32 - (p0.x() > pos_curve.x()) as i32;
+
                             p0 -= glam::vec2(0.0, pos_curve.y() - 0.5);
                             p1 -= glam::vec2(0.0, pos_curve.y() - 0.5);
 
-                            if sign_x > 0 {
-                                if sign_y > 0 {
-                                    let xx0 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p0.x(), p1.x());
-                                    let xx1 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p0.x(), p1.x());
-                                    coverage += Self::line_coverage_right(p0, p1, xx0, xx1, dxdy.y());
-                                } else {
-                                    let xx0 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p0.x(), p1.x());
-                                    let xx1 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p0.x(), p1.x());
-                                    coverage += Self::line_coverage_left(p1, p0, xx0, xx1, dxdy.y());
-                                }
-                            } else if sign_x < 0 {
-                                if sign_y > 0 {
-                                    let xx0 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p1.x(), p0.x());
-                                    let xx1 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p1.x(), p0.x());
-                                    coverage -= Self::line_coverage_left(p0, p1, xx0, xx1, dxdy.y());
-                                } else {
-                                    let xx0 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p1.x(), p0.x());
-                                    let xx1 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p1.x(), p0.x());
-                                    coverage -= Self::line_coverage_right(p1, p0, xx0, xx1, dxdy.y());
+                            if hit != 0 {
+                                if sign_x > 0 {
+                                    if sign_y > 0 {
+                                        let xx0 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p0.x(), p1.x());
+                                        let xx1 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p0.x(), p1.x());
+                                        coverage += Self::line_coverage_right(p0, p1, xx0, xx1, dxdy.y());
+                                    } else {
+                                        let xx0 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p0.x(), p1.x());
+                                        let xx1 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p0.x(), p1.x());
+                                        coverage += Self::line_coverage_left(p1, p0, xx0, xx1, dxdy.y());
+                                    }
+                                } else if sign_x < 0 {
+                                    if sign_y > 0 {
+                                        let xx0 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p1.x(), p0.x());
+                                        let xx1 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p1.x(), p0.x());
+                                        coverage -= Self::line_coverage_left(p0, p1, xx0, xx1, dxdy.y());
+                                    } else {
+                                        let xx0 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p1.x(), p0.x());
+                                        let xx1 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p1.x(), p0.x());
+                                        coverage -= Self::line_coverage_right(p1, p0, xx0, xx1, dxdy.y());
+                                    }
                                 }
                             }
                         }
