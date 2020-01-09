@@ -14,6 +14,7 @@ fn main() {
 
     app.add_scene(runic::Key::Key1, render_scene0);
     app.add_scene(runic::Key::Key2, render_scene1);
+    app.add_scene(runic::Key::Key3, render_scene2);
 
     app.add_filter(runic::Key::N, runic::BoxFilter::new(-0.5, 0.5));
     app.add_filter(runic::Key::B, runic::TentFilter);
@@ -137,4 +138,21 @@ fn render_scene1(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
         },
         &path_line3,
     );
+}
+
+fn render_scene2(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Framebuffer) {
+    rasterizer.cmd_fill(
+        framebuffer,
+        glam::Vec2::new(40.0, 10.0),
+        glam::Vec2::new(320.0, 40.0),
+        0.5,
+    );
+    for i in 0..100 {
+        rasterizer.cmd_fill(
+            framebuffer,
+            glam::Vec2::new(50.0 + i as f32 * 3.0, 20.0),
+            glam::Vec2::new(3.0, 20.0),
+            (i + 1) as f32 * 0.01,
+        );
+    }
 }

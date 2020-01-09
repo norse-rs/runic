@@ -1,5 +1,11 @@
 use crate::{BoxFilter, LanzcosFilter, Filter, SampleId, math::*};
 
+#[derive(Debug, Clone, Copy)]
+pub enum Colorspace {
+    Linear,
+    Srgb,
+}
+
 pub struct Frame {
     pub width: u32,
     pub height: u32,
@@ -15,7 +21,7 @@ impl Frame {
         }
     }
 
-    pub fn reconstruct(&mut self, framebuffer: &Framebuffer, filter: & dyn Filter) {
+    pub fn reconstruct(&mut self, framebuffer: &Framebuffer, filter: & dyn Filter, colorspace: Colorspace) {
         assert_eq!(self.width, framebuffer.width);
         assert_eq!(self.height, framebuffer.height);
         assert!(framebuffer.is_complete());
@@ -56,7 +62,12 @@ impl Frame {
                     0.0
                 };
 
-                let value = (std::u8::MAX as f64 * coverage as f64) as u32;
+                let opacity = match colorspace {
+                    Colorspace::Linear => coverage,
+                    Colorspace::Srgb => linear_to_srgb(coverage),
+                };
+
+                let value = (std::u8::MAX as f64 * opacity as f64) as u32;
                 let i = /* (self.height - y - 1)*/ y * self.width + x; // y -flip
                 self.data[i as usize] =
                     0xFF << 24 | value << 16 | value << 8 | value << 0;

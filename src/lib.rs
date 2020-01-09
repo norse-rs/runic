@@ -24,6 +24,7 @@ pub struct App {
     frame: Frame,
     framebuffer: Framebuffer,
     window: Window,
+    colorspace: Colorspace,
 
     rasterizers: Vec<(Key, Box<dyn Rasterizer>, UniformSampler)>,
     scenes: Vec<(Key, Scene)>,
@@ -61,6 +62,7 @@ impl App {
             frame,
             framebuffer,
             window,
+            colorspace: Colorspace::Srgb,
             rasterizers: Vec::new(),
             active_rasterizer: None,
             scenes: Vec::new(),
@@ -111,7 +113,7 @@ impl App {
 
                 print!("reconstruct frame..");
                 self.frame
-                    .reconstruct(&mut self.framebuffer, &**filter);
+                    .reconstruct(&mut self.framebuffer, &**filter, self.colorspace);
                 println!("{:?}", start.elapsed());
 
                 self.window.set_title(&format!("{} - Scene {}", rasterizer.name(), scene_id));
@@ -146,6 +148,14 @@ impl App {
                         for (i, (key, _)) in self.filters.iter().enumerate() {
                             if *key == k {
                                 self.active_filter = Some(i);
+                            }
+                        }
+
+                        // Toggle colorspace
+                        if k == Key::S {
+                            self.colorspace = match self.colorspace {
+                                Colorspace::Linear => Colorspace::Srgb,
+                                Colorspace::Srgb => Colorspace::Linear,
                             }
                         }
                     }
