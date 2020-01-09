@@ -1,13 +1,15 @@
 use crate::{
-    rasterize_each_with_bias, BoxFilter, Curve, Framebuffer, Rasterizer, Rect, SampleId,
-    Segment, Filter,
+    rasterize_each_with_bias, Filter, Curve, Framebuffer, Rasterizer, Rect, SampleId,
+    Segment, math,
 };
 
-pub struct DistanceRasterizer;
+pub struct DistanceRasterizer<F> {
+    pub filter: F,
+}
 
-impl Rasterizer for DistanceRasterizer {
+impl<F: Filter> Rasterizer for DistanceRasterizer<F> {
     fn name(&self) -> String {
-        "DistanceRasterizer".into()
+        format!("DistanceRasterizer :: {}", self.filter.name())
     }
 
     fn create_path(&mut self, segments: &[Segment]) -> Vec<Curve> {
@@ -26,8 +28,6 @@ impl Rasterizer for DistanceRasterizer {
         rect: Rect,
         path: &[Curve],
     ) {
-        let filter = BoxFilter::new(-0.7, 0.7);
-
         rasterize_each_with_bias(
             (1.0, 1.0),
             framebuffer,
@@ -48,7 +48,7 @@ impl Rasterizer for DistanceRasterizer {
                             let n = (dp - dir * t) / dxdy;
                             let d = n.length() * n.x().signum();
 
-                            coverage += sign_y as f32 * filter.cdf(d);
+                            coverage += sign_y as f32 * self.filter.cdf(d);
                         }
                         Curve::Quad { .. } => todo!(),
                     }

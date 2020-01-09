@@ -63,8 +63,8 @@ impl Frame {
                 };
 
                 let opacity = match colorspace {
-                    Colorspace::Linear => coverage,
-                    Colorspace::Srgb => linear_to_srgb(coverage),
+                    Colorspace::Linear => (1.0 - coverage),
+                    Colorspace::Srgb => linear_to_srgb(1.0 - coverage),
                 };
 
                 let value = (std::u8::MAX as f64 * opacity as f64) as u32;

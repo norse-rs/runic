@@ -7,11 +7,13 @@ fn main() {
     let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X1);
 
     app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
-    app.add_rasterizer(runic::Key::F2, runic::DistanceRasterizer {}, runic::UniformSampler { nx: 1, ny: 1 });
-    app.add_rasterizer(runic::Key::F3, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 1, ny: 1 });
-    app.add_rasterizer(runic::Key::F4, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 8, ny: 8 });
-    app.add_rasterizer(runic::Key::F5, runic::AnalyticBoxRasterizer, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F2, runic::DistanceRasterizer { filter: runic::BoxFilter::new(-0.7, 0.7) }, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F3, runic::DistanceRasterizer { filter: runic::RadialBoxFilter { radius: 1.4 } }, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F4, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F5, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 8, ny: 8 });
+    app.add_rasterizer(runic::Key::F6, runic::AnalyticBoxRasterizer, runic::UniformSampler { nx: 1, ny: 1 });
 
+    app.add_scene(runic::Key::Key4, render_scene3);
     app.add_scene(runic::Key::Key1, render_scene0);
     app.add_scene(runic::Key::Key2, render_scene1);
     app.add_scene(runic::Key::Key3, render_scene2);
@@ -147,12 +149,51 @@ fn render_scene2(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
         glam::Vec2::new(320.0, 40.0),
         0.5,
     );
-    for i in 0..100 {
+    let num_bands = 100;
+    for i in 0..num_bands {
         rasterizer.cmd_fill(
             framebuffer,
             glam::Vec2::new(50.0 + i as f32 * 3.0, 20.0),
             glam::Vec2::new(3.0, 20.0),
-            (i + 1) as f32 * 0.01,
+            (i + 1) as f32 / num_bands as f32,
         );
     }
+}
+
+fn render_scene3(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Framebuffer) {
+    let radius = 100.0;
+    let center = glam::vec2(0.0, 0.0);
+
+    let num_segments = 32;
+    let segment_step = 2.0 * std::f32::consts::PI / num_segments as f32;
+
+    let mut path = runic::PathBuilder::new();
+
+    for n in 0..num_segments {
+        let (s0, c0) = (segment_step * (n as f32 + 0.25)).sin_cos();
+        let (s1, c1) = (segment_step * (n as f32 - 0.25)).sin_cos();
+
+        path = path
+            .move_to(center)
+            .line_to(glam::vec2(c0, s0) * radius + center)
+            .line_to(glam::vec2(c1, s1) * radius + center)
+            .close();
+    }
+
+    let segments = vec![path.finish()];
+    let aabb = runic::Aabb::from_segments(&segments);
+
+    // rasterize scene
+    let path = rasterizer.create_path(&segments);
+
+    rasterizer.cmd_draw(
+        framebuffer,
+        runic::Rect {
+            offset_local: glam::vec2(20.0, 20.0),
+            extent_local: glam::vec2(200.0, 200.0),
+            offset_curve: glam::vec2(-radius, -radius),
+            extent_curve: glam::vec2(2.0 * radius, 2.0 * radius),
+        },
+        &path,
+    );
 }
