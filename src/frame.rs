@@ -44,27 +44,28 @@ impl Frame {
                             let id = sample_id + offset;
                             let sample = framebuffer.samples[id];
 
-                            let clamped_sample = sample.min(1.0).max(0.0);
-
                             let dx = ix as i32 - x as i32;
                             let dy = iy as i32 - y as i32;
                             let weight = filter.pdf(sample_pos.x() - 0.5 + dx as f32) * filter.pdf(sample_pos.y() - 0.5 + dy as f32); // 2d separable filter
 
-                            acc_sample += clamped_sample * weight;
+                            acc_sample += sample * weight;
                             acc_weight += weight;
                         }
                     }
                 }
 
                 let coverage = if acc_weight > 0.0 {
-                    clamp(acc_sample / acc_weight, 0.0, 1.0)
+                    acc_sample / acc_weight
                 } else {
                     0.0
                 };
 
+                let coverage = 0.5 * coverage + 0.5; // post process [-1.0, 1.0] -> [0.0, 1.0]
+                let coverage = clamp(coverage, 0.0, 1.0);
+
                 let opacity = match colorspace {
-                    Colorspace::Linear => (1.0 - coverage),
-                    Colorspace::Srgb => linear_to_srgb(1.0 - coverage),
+                    Colorspace::Linear => coverage,
+                    Colorspace::Srgb => linear_to_srgb(coverage),
                 };
 
                 let value = (std::u8::MAX as f64 * opacity as f64) as u32;

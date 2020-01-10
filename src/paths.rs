@@ -106,6 +106,16 @@ impl PathBuilder {
         self
     }
 
+    pub fn quad_to(mut self, p1: glam::Vec2, p2: glam::Vec2) -> Self {
+        self.curves.push(Curve::Quad {
+            p0: self.last,
+            p1,
+            p2,
+        });
+        self.last = p2;
+        self
+    }
+
     pub fn close(mut self) -> Self {
         self.curves.push(Curve::Line {
             p0: self.last,

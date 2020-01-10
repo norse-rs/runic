@@ -4,21 +4,22 @@ const WIDTH: u32 = 480;
 const HEIGHT: u32 = 260;
 
 fn main() {
-    let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X1);
-
-    app.add_rasterizer(runic::Key::F6, runic::AnalyticBoxRasterizer, runic::UniformSampler { nx: 1, ny: 1 });
+    let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X2);
 
     app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F2, runic::DistanceRasterizer { filter: runic::BoxFilter::new(-0.7, 0.7) }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F3, runic::DistanceRasterizer { filter: runic::RadialBoxFilter { radius: 0.7 } }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F4, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F5, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 8, ny: 8 });
+    app.add_rasterizer(runic::Key::F6, runic::AnalyticBoxRasterizer, runic::UniformSampler { nx: 1, ny: 1 });
 
 
-    app.add_scene(runic::Key::Key4, render_scene3);
-    app.add_scene(runic::Key::Key1, render_scene0);
     app.add_scene(runic::Key::Key2, render_scene1);
+
+    app.add_scene(runic::Key::Key1, render_scene0);
+
     app.add_scene(runic::Key::Key3, render_scene2);
+    app.add_scene(runic::Key::Key4, render_scene3);
 
     app.add_filter(runic::Key::N, runic::BoxFilter::new(-0.5, 0.5));
     app.add_filter(runic::Key::B, runic::TentFilter);
@@ -96,11 +97,18 @@ fn render_scene1(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
         .finish()];
     let aabb_line3 = runic::Aabb::from_segments(&segments_line3);
 
+    let segments_quad0 = vec![runic::PathBuilder::new()
+        .move_to(glam::vec2(0.0, 0.0))
+        .quad_to(glam::vec2(20.0, 70.0), glam::vec2(100.0, 100.0))
+        .finish()];
+    let aabb_quad0 = runic::Aabb::from_segments(&segments_quad0);
+
     // rasterize scene
     let path_line0 = rasterizer.create_path(&segments_line0);
     let path_line1 = rasterizer.create_path(&segments_line1);
     let path_line2 = rasterizer.create_path(&segments_line2);
     let path_line3 = rasterizer.create_path(&segments_line3);
+    let path_quad0 = rasterizer.create_path(&segments_quad0);
 
     rasterizer.cmd_draw(
         framebuffer,
@@ -141,6 +149,17 @@ fn render_scene1(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
             extent_curve: aabb_line3.max - aabb_line3.min,
         },
         &path_line3,
+    );
+
+    rasterizer.cmd_draw(
+        framebuffer,
+        runic::Rect {
+            offset_local: glam::vec2(240.0, 20.0),
+            extent_local: glam::vec2(100.0, 100.0),
+            offset_curve: aabb_quad0.min,
+            extent_curve: aabb_quad0.max - aabb_quad0.min,
+        },
+        &path_quad0,
     );
 }
 

@@ -50,7 +50,26 @@ impl<F: Filter> Rasterizer for CoarseRasterizer<F> {
                                 coverage -= sign_y as f32 * t;
                             }
                         }
-                        Curve::Quad { .. } => todo!(),
+                        Curve::Quad { p0, p1, p2 } => {
+                            let p0 = *p0 - pos_curve;
+                            let p1 = *p1 - pos_curve;
+                            let p2 = *p2 - pos_curve;
+
+                            // // intersection check
+                            let sign_x = (p2.y() > 0.0) as i32 - (p0.y() > 0.0) as i32;
+
+                            let a = p0 - 2.0 * p1 + p2;
+                            let b = p0 - p1;
+                            let c = p0;
+
+                            // quad raycast
+                            let dscr_sq = (b.y() * b.y() - a.y() * c.y());
+                            let tx = (b.y() + sign_x as f32 * dscr_sq.sqrt()) / a.y();
+
+                            let dx = ((a.x() * tx - 2.0 * b.x()) * tx + c.x()) / dxdy.x(); // quad eval
+
+                            coverage -= sign_x as f32 * self.filter.cdf(dx);
+                        }
                     }
                 }
 
