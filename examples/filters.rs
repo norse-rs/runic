@@ -20,7 +20,7 @@ fn main() {
 fn render_scene0(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Framebuffer) {
     // scene geometry
     let segments_triangle0 = vec![runic::PathBuilder::new()
-        .move_to(glam::vec2(0.0, 0.0))
+        .move_to(glam::vec2(10.0, 0.0))
         .line_to(glam::vec2(20.0, 100.0))
         .line_to(glam::vec2(20.0, 0.0))
         .close()

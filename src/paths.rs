@@ -74,6 +74,58 @@ impl Curve {
             }
         }
     }
+
+    pub fn eval(&self, t: f32) -> glam::Vec2 {
+        match *self {
+            Curve::Line { p0, p1 } => (1.0 - t) * p0 + t * p1,
+            Curve::Quad { p0, p1, p2 } => (1.0 - t) * (1.0 - t) * p0 + 2.0 * t * (1.0 - t) * p1 + t * t * p2,
+        }
+    }
+
+    pub fn monotonize(&self) -> Vec<Curve> {
+        match *self {
+            Curve::Line { .. } => vec![*self],
+            Curve::Quad { p0, p1, p2 } => {
+                let min = glam::vec2(p0.x().min(p2.x()), p0.y().min(p2.y()));
+                let max = glam::vec2(p0.x().max(p2.x()), p0.y().max(p2.y()));
+
+                let tx = if p1.x() < min.x() || max.x() < p1.x() {
+                    Some((p0.x() - p1.x()) / (p0.x() - 2.0 * p1.x() + p2.x()))
+                } else {
+                    None
+                };
+
+                let ty = if p1.y() < min.y() || max.y() < p1.y() {
+                    Some((p0.y() - p1.y()) / (p0.y() - 2.0 * p1.y() + p2.y()))
+                } else {
+                    None
+                };
+
+                match (tx, ty) {
+                    (Some(tx), Some(ty)) => {
+                        let t = tx.min(ty);
+                        let p = self.eval(t);
+                        let p10 = Curve::Line { p0, p1 }.eval(t);
+                        let p11 = Curve::Line { p0: p1, p1: p2 }.eval(t);
+                        let mut curves = vec![Curve::Quad { p0, p1: p10, p2: p }];
+                        curves.extend(Curve::Quad { p0: p, p1: p11, p2 }.monotonize());
+                        curves
+                    }
+                    (Some(t), None) | (None, Some(t)) => {
+                        let p = self.eval(t);
+                        let p10 = Curve::Line { p0, p1 }.eval(t);
+                        let p11 = Curve::Line { p0: p1, p1: p2 }.eval(t);
+                        vec![Curve::Quad { p0, p1: p10, p2: p }, Curve::Quad { p0: p, p1: p11, p2 }]
+                    }
+                    (None, None) => vec![*self],
+                }
+            }
+        }
+    }
+
+    pub fn monotize_path(curves: &[Curve]) -> Vec<Curve> {
+        curves.iter().map(|curve| curve.monotonize()).flatten().collect()
+    }
 }
 
 pub struct PathBuilder {
@@ -122,6 +174,11 @@ impl PathBuilder {
             p1: self.first,
         });
         self.last = self.first;
+        self
+    }
+
+    pub fn monotonize(mut self) -> Self {
+        self.curves = Curve::monotize_path(&self.curves);
         self
     }
 

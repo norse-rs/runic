@@ -103,12 +103,21 @@ fn render_scene1(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
         .finish()];
     let aabb_quad0 = runic::Aabb::from_segments(&segments_quad0);
 
+    let segments_quad1 = vec![runic::PathBuilder::new()
+        .move_to(glam::vec2(0.0, 0.0))
+        .quad_to(glam::vec2(100.0, 50.0), glam::vec2(0.0, 100.0))
+        .monotonize()
+        .finish()];
+    dbg!(&segments_quad1);
+    let aabb_quad1 = runic::Aabb::from_segments(&segments_quad1);
+
     // rasterize scene
     let path_line0 = rasterizer.create_path(&segments_line0);
     let path_line1 = rasterizer.create_path(&segments_line1);
     let path_line2 = rasterizer.create_path(&segments_line2);
     let path_line3 = rasterizer.create_path(&segments_line3);
     let path_quad0 = rasterizer.create_path(&segments_quad0);
+    let path_quad1 = rasterizer.create_path(&segments_quad1);
 
     rasterizer.cmd_draw(
         framebuffer,
@@ -160,6 +169,16 @@ fn render_scene1(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
             extent_curve: aabb_quad0.max - aabb_quad0.min,
         },
         &path_quad0,
+    );
+    rasterizer.cmd_draw(
+        framebuffer,
+        runic::Rect {
+            offset_local: glam::vec2(360.0, 20.0),
+            extent_local: glam::vec2(100.0, 100.0),
+            offset_curve: glam::vec2(0.0, 0.0),
+            extent_curve: glam::vec2(100.0, 100.0),
+        },
+        &path_quad1,
     );
 }
 

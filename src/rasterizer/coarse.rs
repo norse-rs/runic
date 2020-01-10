@@ -63,12 +63,18 @@ impl<F: Filter> Rasterizer for CoarseRasterizer<F> {
                             let c = p0;
 
                             // quad raycast
-                            let dscr_sq = (b.y() * b.y() - a.y() * c.y());
-                            let tx = (b.y() + sign_x as f32 * dscr_sq.sqrt()) / a.y();
+                            if sign_x != 0 {
+                                let dscr_sq = (b.y() * b.y() - a.y() * c.y());
+                                let tx = if a.y().abs() < 0.0001 {
+                                    line_raycast(p0.y(), p2.y(), 0.0)
+                                } else {
+                                    (b.y() + sign_x as f32 * dscr_sq.sqrt()) / a.y()
+                                };
 
-                            let dx = ((a.x() * tx - 2.0 * b.x()) * tx + c.x()) / dxdy.x(); // quad eval
+                                let dx = ((a.x() * tx - 2.0 * b.x()) * tx + c.x()) / dxdy.x(); // quad eval
 
-                            coverage -= sign_x as f32 * self.filter.cdf(dx);
+                                coverage -= sign_x as f32 * self.filter.cdf(dx);
+                            }
                         }
                     }
                 }
