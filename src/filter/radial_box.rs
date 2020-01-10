@@ -17,8 +17,8 @@ impl Filter for RadialBoxFilter {
     fn cdf(&self, x: f32) -> f32 {
         let d = clamp(-x / self.radius, -1.0, 1.0);
         let triangle = (1.0 - d*d).sqrt() * d;
-        let segment = d.acos() / 2.0;
-        segment - triangle
+        let segment = d.acos();
+        (segment - triangle) / std::f32::consts::PI
     }
 
     fn relative_bounds(&self, (x, y): (f32, f32)) -> RelativeBounds {
