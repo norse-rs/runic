@@ -4,7 +4,7 @@ const WIDTH: u32 = 480;
 const HEIGHT: u32 = 260;
 
 fn main() {
-    let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X2);
+    let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X1);
 
     app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F2, runic::DistanceRasterizer { filter: runic::BoxFilter::new(-0.7, 0.7) }, runic::UniformSampler { nx: 1, ny: 1 });
@@ -12,6 +12,7 @@ fn main() {
     app.add_rasterizer(runic::Key::F4, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F5, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 8, ny: 8 });
     app.add_rasterizer(runic::Key::F6, runic::AnalyticBoxRasterizer, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F7, runic::DistanceRasterizer { filter: runic::Smoothstep { e0: -0.7, e1: 0.7 } }, runic::UniformSampler { nx: 1, ny: 1 });
 
 
     app.add_scene(runic::Key::Key2, render_scene1);

@@ -1,5 +1,5 @@
 use crate::{
-    math::*, rasterize_each_with_bias, Curve, Framebuffer, Rasterizer, Rect, SampleId,
+    math::*, rasterize_each_with_bias, Curve, Framebuffer, Rasterizer, Rect,
     Segment, Filter,
 };
 
@@ -64,7 +64,7 @@ impl<F: Filter> Rasterizer for CoarseRasterizer<F> {
 
                             // quad raycast
                             if sign_x != 0 {
-                                let dscr_sq = (b.y() * b.y() - a.y() * c.y());
+                                let dscr_sq = b.y() * b.y() - a.y() * c.y();
                                 let tx = if a.y().abs() < 0.0001 {
                                     line_raycast(p0.y(), p2.y(), 0.0)
                                 } else {

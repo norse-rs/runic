@@ -1,6 +1,6 @@
 use crate::{
     math::*, rasterize_each_with_bias, Curve, Framebuffer, Rasterizer, Rect, SampleId,
-    Segment, Filter, BoxFilter
+    Segment, BoxFilter
 };
 
 pub struct AnalyticBoxRasterizer;

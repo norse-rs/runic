@@ -1,4 +1,4 @@
-use crate::{BoxFilter, LanzcosFilter, Filter, SampleId, math::*};
+use crate::{Filter, math::*};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Colorspace {

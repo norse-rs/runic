@@ -1,4 +1,4 @@
-use crate::{RelativeBounds, Filter, math::*};
+use crate::{RelativeBounds, Filter};
 
 pub struct TentFilter;
 

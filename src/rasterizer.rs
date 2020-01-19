@@ -6,7 +6,7 @@ pub use coarse::*;
 pub use distance::*;
 pub use analytic_box::*;
 
-use crate::{Curve, Extent, FillRect, Framebuffer, Offset, Rect, SampleId, Segment};
+use crate::{Curve, Extent, FillRect, Framebuffer, Offset, Rect, Segment};
 
 pub trait Rasterizer {
     fn name(&self) -> String;
