@@ -24,6 +24,7 @@ cargo run --example furu --release
 
 #### Skia Reference
 <a href='https://fiddle.skia.org/c/25d2497967fe0301c9bf09d2bba22b16'><img src='https://fiddle.skia.org/i/25d2497967fe0301c9bf09d2bba22b16_raster.png'></a>
+<a href='https://fiddle.skia.org/c/ba33a19f376b94a8c2a750cb69527e24'><img src='https://fiddle.skia.org/i/ba33a19f376b94a8c2a750cb69527e24_raster.png'></a>
 
 ```
 cargo run --example filters --release
