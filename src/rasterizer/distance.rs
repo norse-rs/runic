@@ -126,9 +126,7 @@ impl<F: Filter> Rasterizer for DistanceRasterizer<F> {
                             let d = n.length() * n.x().signum();
 
                             coverage += sign_y as f32 * d.signum().min(0.0);
-                            if distance.abs() > d.abs() {
-                                distance = d;
-                            }
+                            distance = distance.min(d.abs());
                         }
                         Curve::Quad { p0, p1, p2 } => {
                             let p0 = *p0 - pos_curve;
@@ -139,14 +137,12 @@ impl<F: Filter> Rasterizer for DistanceRasterizer<F> {
                             let d = distance_quadratic(glam::vec2(0.0, 0.0), p0, p1, p2);
 
                             coverage += sign_y as f32 * d.signum().min(0.0);
-                            if distance.abs() > d.abs() {
-                                distance = d;
-                            }
+                            distance = distance.min(d.abs());
                         }
                     }
                 }
 
-                self.filter.cdf((2.0 * coverage - 1.0) * distance.abs())
+                self.filter.cdf((2.0 * coverage - 1.0) * distance)
             },
         );
     }
