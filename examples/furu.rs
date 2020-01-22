@@ -248,60 +248,65 @@ fn render_scene3(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
 }
 
 fn render_scene4(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Framebuffer) {
-    let font = Font::from_bytes(&ROBOTO).unwrap();
-    let glyphs = glyph_brush_layout::Layout::default().calculate_glyphs(
-        &[font],
-        &SectionGeometry {
-            screen_position: (50.0, 0.0),
-            ..SectionGeometry::default()
-        },
-        &[
-            SectionText {
-                text: "Aoe",
-                scale: Scale::uniform(100.0),
-                ..SectionText::default()
+    let mut offset_y = 0.0;
+    for size in &[18.0, 24.0, 32.0, 48.0, 72.0] {
+        let font = Font::from_bytes(&ROBOTO).unwrap();
+        let glyphs = glyph_brush_layout::Layout::default().calculate_glyphs(
+            &[font],
+            &SectionGeometry {
+                screen_position: (10.0, offset_y),
+                ..SectionGeometry::default()
             },
-        ],
-    );
+            &[
+                SectionText {
+                    text: "quick brown fox",
+                    scale: Scale::uniform(*size),
+                    ..SectionText::default()
+                },
+            ],
+        );
 
+        offset_y += size;
 
-    for (glyph, _, font) in glyphs {
-        let mut path = runic::PathBuilder::new();
+        for (glyph, _, font) in glyphs {
+            let mut path = runic::PathBuilder::new();
 
-        let bbox = glyph.unpositioned().exact_bounding_box().unwrap();
-        let shapes = glyph.unpositioned().shape().unwrap();
-        let mut pos = glyph.position();
-        pos.y -= bbox.min.y;
+            let bbox = glyph.unpositioned().exact_bounding_box().unwrap();
+            let shapes = glyph.unpositioned().shape().unwrap();
+            let mut pos = glyph.position();
+            pos.y -= bbox.min.y;
 
-        for shape in shapes {
-            for segment in &shape.segments {
-                match segment {
-                    Segment::Line(line) => {
-                        path = path.move_to(glam::vec2(line.p[0].x, line.p[0].y + bbox.min.y + bbox.max.y));
-                        path = path.line_to(glam::vec2(line.p[1].x, line.p[1].y + bbox.min.y + bbox.max.y));
-                    }
-                    Segment::Curve(curve) => {
-                        path = path.move_to(glam::vec2(curve.p[0].x, curve.p[0].y + bbox.min.y + bbox.max.y));
-                        path = path.quad_to(
-                            glam::vec2(curve.p[1].x, curve.p[1].y + bbox.min.y + bbox.max.y),
-                            glam::vec2(curve.p[2].x, curve.p[2].y + bbox.min.y + bbox.max.y)
-                        );
+            for shape in shapes {
+                for segment in &shape.segments {
+                    match segment {
+                        Segment::Line(line) => {
+                            path = path.move_to(glam::vec2(line.p[0].x, line.p[0].y + bbox.min.y + bbox.max.y));
+                            path = path.line_to(glam::vec2(line.p[1].x, line.p[1].y + bbox.min.y + bbox.max.y));
+                        }
+                        Segment::Curve(curve) => {
+                            path = path.move_to(glam::vec2(curve.p[0].x, curve.p[0].y + bbox.min.y + bbox.max.y));
+                            path = path.quad_to(
+                                glam::vec2(curve.p[1].x, curve.p[1].y + bbox.min.y + bbox.max.y),
+                                glam::vec2(curve.p[2].x, curve.p[2].y + bbox.min.y + bbox.max.y)
+                            );
+                        }
                     }
                 }
             }
+
+            let mut curves = path.finish();
+
+            rasterizer.cmd_draw(
+                framebuffer,
+                runic::Rect {
+                    offset_local: glam::vec2(pos.x + bbox.min.x as f32, pos.y + bbox.min.y as f32),
+                    extent_local: glam::vec2(bbox.max.x as f32 - bbox.min.x as f32, bbox.max.y as f32 - bbox.min.y as f32),
+                    offset_curve: glam::vec2(bbox.min.x as f32, bbox.min.y as f32),
+                    extent_curve: glam::vec2(bbox.max.x as f32 - bbox.min.x as f32, bbox.max.y as f32 - bbox.min.y as f32),
+                },
+                &curves,
+            );
         }
-
-        let mut curves = path.finish();
-
-        rasterizer.cmd_draw(
-            framebuffer,
-            runic::Rect {
-                offset_local: glam::vec2(pos.x + bbox.min.x as f32, pos.y + bbox.min.y as f32),
-                extent_local: glam::vec2(bbox.max.x as f32 - bbox.min.x as f32, bbox.max.y as f32 - bbox.min.y as f32),
-                offset_curve: glam::vec2(bbox.min.x as f32, bbox.min.y as f32),
-                extent_curve: glam::vec2(bbox.max.x as f32 - bbox.min.x as f32, bbox.max.y as f32 - bbox.min.y as f32),
-            },
-            &curves,
-        );
     }
+
 }
