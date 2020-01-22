@@ -110,6 +110,7 @@ impl<F: Filter> Rasterizer for DistanceRasterizer<F> {
             rect,
             |pos_curve, dxdy| {
                 let mut coverage = 0.0;
+                let mut distance = 10000000.0f32;
                 for curve in path {
                     match curve {
                         Curve::Line { p0, p1 } => {
@@ -124,7 +125,10 @@ impl<F: Filter> Rasterizer for DistanceRasterizer<F> {
                             let n = (dp - dir * t) / dxdy;
                             let d = n.length() * n.x().signum();
 
-                            coverage += sign_y as f32 * self.filter.cdf(d);
+                            coverage += sign_y as f32 * d.signum().min(0.0);
+                            if distance.abs() > d.abs() {
+                                distance = d;
+                            }
                         }
                         Curve::Quad { p0, p1, p2 } => {
                             let p0 = *p0 - pos_curve;
@@ -133,12 +137,16 @@ impl<F: Filter> Rasterizer for DistanceRasterizer<F> {
 
                             let sign_y = (p2.y() > 0.0) as i32 - (p0.y() > 0.0) as i32;
                             let d = distance_quadratic(glam::vec2(0.0, 0.0), p0, p1, p2);
-                            coverage += sign_y as f32 * self.filter.cdf(d);
+
+                            coverage += sign_y as f32 * d.signum().min(0.0);
+                            if distance.abs() > d.abs() {
+                                distance = d;
+                            }
                         }
                     }
                 }
 
-                coverage
+                self.filter.cdf((2.0 * coverage - 1.0) * distance.abs())
             },
         );
     }

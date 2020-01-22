@@ -69,7 +69,12 @@ impl Frame {
                 };
 
                 let value = (std::u8::MAX as f64 * opacity as f64) as u32;
-                let i = /* (self.height - y - 1)*/ y * self.width + x; // y -flip
+                let flip = true;
+                let i = if flip {
+                    (self.height - y - 1) * self.width + x // y -flip
+                } else {
+                    y * self.width + x
+                };
                 self.data[i as usize] =
                     0xFF << 24 | value << 16 | value << 8 | value << 0;
             }

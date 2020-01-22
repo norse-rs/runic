@@ -10,8 +10,10 @@ const ROBOTO: &[u8] = include_bytes!("../assets/Roboto-Regular.ttf");
 fn main() {
     let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X1);
 
-    app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F2, runic::DistanceRasterizer { filter: runic::BoxFilter::new(-0.7, 0.7) }, runic::UniformSampler { nx: 1, ny: 1 });
+
+    app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
+    // app.add_rasterizer(runic::Key::F2, runic::DistanceRasterizer { filter: runic::BoxFilter::new(-0.7, 0.7) }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F3, runic::DistanceRasterizer { filter: runic::RadialBoxFilter { radius: 0.7 } }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F4, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F5, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 8, ny: 8 });
@@ -19,13 +21,14 @@ fn main() {
     app.add_rasterizer(runic::Key::F7, runic::DistanceRasterizer { filter: runic::Smoothstep { e0: -0.7, e1: 0.7 } }, runic::UniformSampler { nx: 1, ny: 1 });
 
 
+    app.add_scene(runic::Key::Key5, render_scene4);
     app.add_scene(runic::Key::Key2, render_scene1);
 
     app.add_scene(runic::Key::Key1, render_scene0);
 
     app.add_scene(runic::Key::Key3, render_scene2);
     app.add_scene(runic::Key::Key4, render_scene3);
-    app.add_scene(runic::Key::Key5, render_scene4);
+
 
     app.add_filter(runic::Key::N, runic::BoxFilter::new(-0.5, 0.5));
     app.add_filter(runic::Key::B, runic::TentFilter);
@@ -254,7 +257,7 @@ fn render_scene4(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
         },
         &[
             SectionText {
-                text: "Test?",
+                text: "Aoe",
                 scale: Scale::uniform(100.0),
                 ..SectionText::default()
             },
@@ -271,7 +274,7 @@ fn render_scene4(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
         pos.y -= bbox.min.y;
 
         for shape in shapes {
-            for segment in shape.segments {
+            for segment in &shape.segments {
                 match segment {
                     Segment::Line(line) => {
                         path = path.move_to(glam::vec2(line.p[0].x, line.p[0].y + bbox.min.y + bbox.max.y));
