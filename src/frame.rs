@@ -60,7 +60,7 @@ impl Frame {
                     0.0
                 };
 
-                let coverage = 0.5 * coverage + 0.5; // post process [-1.0, 1.0] -> [0.0, 1.0]
+                // let coverage = 0.5 * coverage + 0.5; // post process [-1.0, 1.0] -> [0.0, 1.0]
                 let coverage = clamp(coverage, 0.0, 1.0);
 
                 let opacity = match colorspace {
