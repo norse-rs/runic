@@ -274,7 +274,7 @@ fn render_scene4(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
             let bbox = glyph.unpositioned().exact_bounding_box().unwrap();
             let shapes = glyph.unpositioned().shape().unwrap();
             let mut pos = glyph.position();
-            pos.y -= bbox.min.y;
+            pos.y -= bbox.max.y + bbox.min.y;
 
             for shape in shapes {
                 for segment in &shape.segments {
