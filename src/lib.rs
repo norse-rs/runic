@@ -130,6 +130,8 @@ impl App {
             self.window
                 .get_keys_pressed(minifb::KeyRepeat::No)
                 .map(|keys| {
+                    let mut update_frame = false;
+
                     if keys.is_empty() {
                         return;
                     }
@@ -138,29 +140,45 @@ impl App {
                         for (i, (key, _, _)) in self.rasterizers.iter().enumerate() {
                             if *key == k {
                                 self.active_rasterizer = Some(i);
+                                update_frame = true;
                             }
                         }
                         for (i, (key, _)) in self.scenes.iter().enumerate() {
                             if *key == k {
                                 self.active_scene = Some(i);
+                                update_frame = true;
                             }
                         }
                         for (i, (key, _)) in self.filters.iter().enumerate() {
                             if *key == k {
                                 self.active_filter = Some(i);
+                                update_frame = true;
                             }
                         }
 
                         // Toggle colorspace
-                        if k == Key::S {
-                            self.colorspace = match self.colorspace {
-                                Colorspace::Linear => Colorspace::Srgb,
-                                Colorspace::Srgb => Colorspace::Linear,
-                            }
+                        match k {
+                            Key::S => {
+                                self.colorspace = match self.colorspace {
+                                    Colorspace::Linear => Colorspace::Srgb,
+                                    Colorspace::Srgb => Colorspace::Linear,
+                                };
+                                update_frame = true;
+                            },
+                            Key::P => {
+                                if let Some(pos) = self.window.get_mouse_pos(minifb::MouseMode::Discard) {
+                                    let y = pos.1 as usize;
+                                    let x = pos.0 as usize;
+                                    println!("pos: {:?} {:?}", pos, (self.frame.data[y * self.width as usize + x] & 0xFF));
+                                }
+                            },
+                            _ => {}
                         }
                     }
 
-                    self.update_frame();
+                    if update_frame {
+                        self.update_frame();
+                    }
                 });
 
             self.window

@@ -58,20 +58,9 @@ impl<F: Filter> Rasterizer for CoarseRasterizer<F> {
                             // // intersection check
                             let sign_x = (p2.y() > 0.0) as i32 - (p0.y() > 0.0) as i32;
 
-                            let a = p0 - 2.0 * p1 + p2;
-                            let b = p0 - p1;
-                            let c = p0;
-
-                            // quad raycast
                             if sign_x != 0 {
-                                let dscr_sq = b.y() * b.y() - a.y() * c.y();
-                                let tx = if a.y().abs() < 0.0001 {
-                                    line_raycast(p0.y(), p2.y(), 0.0)
-                                } else {
-                                    (b.y() + sign_x as f32 * dscr_sq.sqrt()) / a.y()
-                                };
-
-                                let dx = ((a.x() * tx - 2.0 * b.x()) * tx + c.x()) / dxdy.x(); // quad eval
+                                let tx = quad_raycast(p0.y(), p1.y(), p2.y(), 0.0);
+                                let dx = quad_eval(p0.x(), p1.x(), p2.x(), tx) / dxdy.x();
 
                                 coverage -= sign_x as f32 * self.filter.cdf(dx);
                             }

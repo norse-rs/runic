@@ -294,6 +294,7 @@ fn render_scene4(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
                 }
             }
 
+            path = path.monotonize();
             let mut curves = path.finish();
 
             rasterizer.cmd_draw(
