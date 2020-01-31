@@ -12,6 +12,12 @@ pub struct Frame {
     pub data: Vec<u32>,
 }
 
+pub struct FrameTransform {
+    pub colorspace: Colorspace,
+    pub flip: bool,
+    pub transfer: fn(f32) -> f32,
+}
+
 impl Frame {
     pub fn new(width: u32, height: u32) -> Self {
         Frame {
@@ -21,7 +27,7 @@ impl Frame {
         }
     }
 
-    pub fn reconstruct(&mut self, framebuffer: &Framebuffer, filter: & dyn Filter, colorspace: Colorspace) {
+    pub fn reconstruct(&mut self, framebuffer: &Framebuffer, filter: & dyn Filter, transform: &FrameTransform) {
         assert_eq!(self.width, framebuffer.width);
         assert_eq!(self.height, framebuffer.height);
         assert!(framebuffer.is_complete());
@@ -60,17 +66,15 @@ impl Frame {
                     0.0
                 };
 
-                // let coverage = 0.5 * coverage + 0.5; // post process [-1.0, 1.0] -> [0.0, 1.0]
-                let coverage = clamp(coverage, 0.0, 1.0);
+                let coverage = clamp((transform.transfer)(coverage), 0.0, 1.0);
 
-                let opacity = match colorspace {
+                let opacity = match transform.colorspace {
                     Colorspace::Linear => coverage,
                     Colorspace::Srgb => linear_to_srgb(coverage),
                 };
 
                 let value = (std::u8::MAX as f64 * opacity as f64) as u32;
-                let flip = true;
-                let i = if flip {
+                let i = if transform.flip {
                     (self.height - y - 1) * self.width + x // y -flip
                 } else {
                     y * self.width + x

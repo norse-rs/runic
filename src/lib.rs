@@ -18,13 +18,16 @@ pub use minifb::*;
 
 pub type Scene = fn(&mut dyn Rasterizer, &mut Framebuffer);
 
+fn transfer_neg_pos(x: f32) -> f32 { x * 0.5 + 0.5 }
+fn transfer_identity(x: f32) -> f32 { x }
+
 pub struct App {
     width: u32,
     height: u32,
     frame: Frame,
     framebuffer: Framebuffer,
     window: Window,
-    colorspace: Colorspace,
+    transform: FrameTransform,
 
     rasterizers: Vec<(Key, Box<dyn Rasterizer>, UniformSampler)>,
     scenes: Vec<(Key, Scene)>,
@@ -62,7 +65,11 @@ impl App {
             frame,
             framebuffer,
             window,
-            colorspace: Colorspace::Srgb,
+            transform: FrameTransform {
+                colorspace: Colorspace::Srgb,
+                flip: true,
+                transfer: |x: f32| 0.5 * x + 0.5,
+            },
             rasterizers: Vec::new(),
             active_rasterizer: None,
             scenes: Vec::new(),
@@ -113,7 +120,7 @@ impl App {
 
                 print!("reconstruct frame..");
                 self.frame
-                    .reconstruct(&mut self.framebuffer, &**filter, self.colorspace);
+                    .reconstruct(&mut self.framebuffer, &**filter, &self.transform);
                 println!("{:?}", start.elapsed());
 
                 self.window.set_title(&format!("{} - Scene {}", rasterizer.name(), scene_id));
@@ -159,10 +166,22 @@ impl App {
                         // Toggle colorspace
                         match k {
                             Key::S => {
-                                self.colorspace = match self.colorspace {
+                                self.transform.colorspace = match self.transform.colorspace {
                                     Colorspace::Linear => Colorspace::Srgb,
                                     Colorspace::Srgb => Colorspace::Linear,
                                 };
+                                update_frame = true;
+                            },
+                            Key::F => {
+                                self.transform.flip = !self.transform.flip;
+                                update_frame = true;
+                            },
+                            Key::T => {
+                                self.transform.transfer = transfer_neg_pos;
+                                update_frame = true;
+                            },
+                            Key::R => {
+                                self.transform.transfer = transfer_identity;
                                 update_frame = true;
                             },
                             Key::P => {

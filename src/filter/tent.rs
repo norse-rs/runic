@@ -15,7 +15,7 @@ impl Filter for TentFilter {
         value.max(0.0)
     }
 
-    fn cdf(&self, x: f32) -> f32 {
+    fn cdf(&self, _x: f32) -> f32 {
         todo!()
     }
 

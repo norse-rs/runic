@@ -28,7 +28,7 @@ impl AnalyticBoxRasterizer {
         let rectangle = clamp(clamp(y1, 0.0, 1.0) * (xx1 - x1), 0.0, 1.0);
         let trapezoid = clamp((y0 + y1) * 0.5 * (x1 - x0), 0.0, 1.0);
 
-        let area = rectangle;
+        let area = rectangle + trapezoid;
         clamp(area, 0.0, 1.0)
     }
 
@@ -54,7 +54,7 @@ impl AnalyticBoxRasterizer {
         let rectangle = clamp(clamp(y1, 0.0, 1.0) * (x1 - xx1), 0.0, 1.0);
         let trapezoid = clamp((y0 + y1) * 0.5 * (x0 - x1), 0.0, 1.0);
 
-        let area = rectangle;
+        let area = rectangle + trapezoid;
         clamp(area, 0.0, 1.0)
     }
 

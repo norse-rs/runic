@@ -24,7 +24,7 @@ impl Filter for LanzcosFilter {
         }
     }
 
-    fn cdf(&self, x: f32) -> f32 {
+    fn cdf(&self, _x: f32) -> f32 {
         todo!()
     }
 

@@ -15,7 +15,7 @@ impl Filter for StepFilter {
         if x < 0.0 { 0.0 } else { 1.0 }
     }
 
-    fn relative_bounds(&self, (x, y): (f32, f32)) -> RelativeBounds {
+    fn relative_bounds(&self, (_x, _y): (f32, f32)) -> RelativeBounds {
         todo!()
     }
 }

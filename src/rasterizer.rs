@@ -59,7 +59,7 @@ pub(crate) fn rasterize_each_with_bias<F>(
     for y in fill_rect.y0..=fill_rect.y1 {
         for x in fill_rect.x0..=fill_rect.x1 {
             for (sample_id, sample_pos) in framebuffer.sample_pos.iter().enumerate() {
-                /* if x == 336 && y == 211 */ {
+                {
                     let pos_local = glam::Vec2::new(x as f32, y as f32) + *sample_pos;
                     let pos_curve = rect.local_to_curve(pos_local);
 

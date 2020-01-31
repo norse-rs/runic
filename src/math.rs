@@ -11,7 +11,7 @@ pub fn quad_eval(p0: f32, p1: f32, p2: f32, t: f32) -> f32 {
 }
 
 pub fn quad_raycast(p0: f32, p1: f32, p2: f32, t: f32) -> f32 {
-    if t < p0.min(p2) || t > p0.max(p2) {
+    if t <= p0.min(p2) || t >= p0.max(p2) {
         return line_raycast(p0, p2, t);
     }
 
