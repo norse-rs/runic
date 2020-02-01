@@ -8,27 +8,25 @@ const HEIGHT: u32 = 260;
 const ROBOTO: &[u8] = include_bytes!("../assets/Roboto-Regular.ttf");
 
 fn main() {
-    let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X1);
+    let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X2);
 
-    app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
-    app.add_rasterizer(runic::Key::F2, runic::DistanceRasterizer { filter: runic::BoxFilter::new(-0.7, 0.7) }, runic::UniformSampler { nx: 1, ny: 1 });
 
-    // app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { direction: runic::CoarseDirection::X, filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F2, runic::CoarseRasterizer { direction: runic::CoarseDirection::Y, filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
     // app.add_rasterizer(runic::Key::F2, runic::DistanceRasterizer { filter: runic::BoxFilter::new(-0.7, 0.7) }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F3, runic::DistanceRasterizer { filter: runic::RadialBoxFilter { radius: 0.7 } }, runic::UniformSampler { nx: 1, ny: 1 });
-    app.add_rasterizer(runic::Key::F4, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 1, ny: 1 });
-    app.add_rasterizer(runic::Key::F5, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 8, ny: 8 });
+    // app.add_rasterizer(runic::Key::F4, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 1, ny: 1 });
+    // app.add_rasterizer(runic::Key::F5, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 8, ny: 8 });
     app.add_rasterizer(runic::Key::F6, runic::AnalyticBoxRasterizer, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F7, runic::DistanceRasterizer { filter: runic::Smoothstep { e0: -0.7, e1: 0.7 } }, runic::UniformSampler { nx: 1, ny: 1 });
 
 
-    app.add_scene(runic::Key::Key5, render_scene4);
-    app.add_scene(runic::Key::Key2, render_scene1);
-
     app.add_scene(runic::Key::Key1, render_scene0);
+    app.add_scene(runic::Key::Key2, render_scene1);
 
     app.add_scene(runic::Key::Key3, render_scene2);
     app.add_scene(runic::Key::Key4, render_scene3);
+    app.add_scene(runic::Key::Key5, render_scene4);
 
 
     app.add_filter(runic::Key::N, runic::BoxFilter::new(-0.5, 0.5));
@@ -48,9 +46,10 @@ fn render_scene0(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
     let aabb_triangle0 = runic::Aabb::from_segments(&segments_triangle0);
 
     let segments_triangle1 = vec![runic::PathBuilder::new()
-        .move_to(glam::vec2(25.0, 0.0))
-        .line_to(glam::vec2(0.0, 100.0))
-        .line_to(glam::vec2(50.0, 100.0))
+        .move_to(glam::vec2(60.2, 80.4))
+        .line_to(glam::vec2(80.0, 80.4))
+        .line_to(glam::vec2(89.0, 8.4))
+        .line_to(glam::vec2(70.2, 8.0))
         .close()
         .finish()];
     let aabb_triangle1 = runic::Aabb::from_segments(&segments_triangle1);
@@ -62,20 +61,21 @@ fn render_scene0(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
     rasterizer.cmd_draw(
         framebuffer,
         runic::Rect {
-            offset_local: glam::vec2(10.0, 10.0),
-            extent_local: glam::vec2(50.0, 100.0),
-            offset_curve: aabb_triangle0.min,
-            extent_curve: aabb_triangle0.max - aabb_triangle0.min,
+            offset_local: glam::vec2(200.0, 0.0),
+            extent_local: glam::vec2(100.0, 100.0),
+            offset_curve: glam::vec2(0.0, 0.0),
+            extent_curve: glam::vec2(100.0, 100.0),
         },
-        &path_triangle0,
+        &path_triangle1,
     );
+
     rasterizer.cmd_draw(
         framebuffer,
         runic::Rect {
-            offset_local: glam::vec2(80.0, 10.0),
-            extent_local: glam::vec2(50.0, 100.0),
-            offset_curve: aabb_triangle1.min,
-            extent_curve: aabb_triangle1.max - aabb_triangle1.min,
+            offset_local: glam::vec2(0.0, 0.0),
+            extent_local: glam::vec2(100.0, 100.0),
+            offset_curve: glam::vec2(0.0, 0.0),
+            extent_curve: glam::vec2(100.0, 100.0),
         },
         &path_triangle1,
     );
@@ -281,14 +281,14 @@ fn render_scene4(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
                 for segment in &shape.segments {
                     match segment {
                         Segment::Line(line) => {
-                            path = path.move_to(glam::vec2(line.p[0].x, line.p[0].y + bbox.min.y + bbox.max.y));
-                            path = path.line_to(glam::vec2(line.p[1].x, line.p[1].y + bbox.min.y + bbox.max.y));
+                            path = path.move_to(glam::vec2(line.p[0].x - bbox.min.x, line.p[0].y + bbox.max.y));
+                            path = path.line_to(glam::vec2(line.p[1].x - bbox.min.x, line.p[1].y + bbox.max.y));
                         }
                         Segment::Curve(curve) => {
-                            path = path.move_to(glam::vec2(curve.p[0].x, curve.p[0].y + bbox.min.y + bbox.max.y));
+                            path = path.move_to(glam::vec2(curve.p[0].x - bbox.min.x, curve.p[0].y + bbox.max.y));
                             path = path.quad_to(
-                                glam::vec2(curve.p[1].x, curve.p[1].y + bbox.min.y + bbox.max.y),
-                                glam::vec2(curve.p[2].x, curve.p[2].y + bbox.min.y + bbox.max.y)
+                                glam::vec2(curve.p[1].x - bbox.min.x, curve.p[1].y + bbox.max.y),
+                                glam::vec2(curve.p[2].x - bbox.min.x, curve.p[2].y + bbox.max.y)
                             );
                         }
                     }
@@ -298,14 +298,16 @@ fn render_scene4(rasterizer: &mut dyn Rasterizer, framebuffer: &mut runic::Frame
             path = path.monotonize();
             let mut curves = path.finish();
 
+            let rect = runic::Rect {
+                offset_local: glam::vec2(pos.x + bbox.min.x as f32, pos.y + bbox.min.y as f32),
+                extent_local: glam::vec2(bbox.max.x as f32 - bbox.min.x as f32, bbox.max.y as f32 - bbox.min.y as f32),
+                offset_curve: glam::vec2(0.0, 0.0),
+                extent_curve: glam::vec2(bbox.max.x as f32 - bbox.min.x as f32, bbox.max.y as f32 - bbox.min.y as f32),
+            };
+
             rasterizer.cmd_draw(
                 framebuffer,
-                runic::Rect {
-                    offset_local: glam::vec2(pos.x + bbox.min.x as f32, pos.y + bbox.min.y as f32),
-                    extent_local: glam::vec2(bbox.max.x as f32 - bbox.min.x as f32, bbox.max.y as f32 - bbox.min.y as f32),
-                    offset_curve: glam::vec2(bbox.min.x as f32, bbox.min.y as f32),
-                    extent_curve: glam::vec2(bbox.max.x as f32 - bbox.min.x as f32, bbox.max.y as f32 - bbox.min.y as f32),
-                },
+                rect,
                 &curves,
             );
         }
