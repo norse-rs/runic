@@ -48,7 +48,6 @@ fn distance_quadratic(p: glam::Vec2, p0: glam::Vec2, p1: glam::Vec2, p2: glam::V
 
     let m = p0 - p;
 
-
     let t = {
         let (a, b, c, d) = (b.dot(b), 3.0 * a.dot(b), a.dot(a) * 2.0 + m.dot(b), m.dot(a));
         let unpress = b / (3.0 * a);

@@ -75,7 +75,7 @@ impl Frame {
 
                 let value = (std::u8::MAX as f64 * opacity as f64) as u32;
                 let i = if transform.flip {
-                    (self.height - y - 1) * self.width + x // y -flip
+                    (self.height - y - 1) * self.width + x
                 } else {
                     y * self.width + x
                 };

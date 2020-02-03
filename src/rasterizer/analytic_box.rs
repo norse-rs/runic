@@ -204,21 +204,21 @@ impl Rasterizer for AnalyticBoxRasterizer {
                                     if sign_y > 0 {
                                         let xx0 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p0.x(), p2.x());
                                         let xx1 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p0.x(), p2.x());
-                                        coverage += (Self::quad_line_coverage_right(p0, p1, p2, xx0, xx1, dxdy.y()));
+                                        coverage += Self::quad_line_coverage_right(p0, p1, p2, xx0, xx1, dxdy.y());
                                     } else {
                                         let xx0 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p0.x(), p2.x());
                                         let xx1 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p0.x(), p2.x());
-                                        coverage += (Self::quad_line_coverage_left(p2, p1, p0, xx0, xx1, dxdy.y()));
+                                        coverage += Self::quad_line_coverage_left(p2, p1, p0, xx0, xx1, dxdy.y());
                                     }
                                 } else if sign_x < 0 {
                                     if sign_y > 0 {
                                         let xx0 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p2.x(), p0.x());
                                         let xx1 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p2.x(), p0.x());
-                                        coverage -= (Self::quad_line_coverage_left(p0, p1, p2, xx0, xx1, dxdy.y()));
+                                        coverage -= Self::quad_line_coverage_left(p0, p1, p2, xx0, xx1, dxdy.y());
                                     } else {
                                         let xx0 = clamp(pos_curve.x() - 0.5 * dxdy.x(), p2.x(), p0.x());
                                         let xx1 = clamp(pos_curve.x() + 0.5 * dxdy.x(), p2.x(), p0.x());
-                                        coverage -= (Self::quad_line_coverage_right(p2, p1, p0, xx0, xx1, dxdy.y()));
+                                        coverage -= Self::quad_line_coverage_right(p2, p1, p0, xx0, xx1, dxdy.y());
                                     }
                                 }
                             }

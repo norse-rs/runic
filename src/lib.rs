@@ -67,7 +67,7 @@ impl App {
             window,
             transform: FrameTransform {
                 colorspace: Colorspace::Srgb,
-                flip: true,
+                flip: false,
                 transfer: |x: f32| 0.5 * x + 0.5,
             },
             rasterizers: Vec::new(),

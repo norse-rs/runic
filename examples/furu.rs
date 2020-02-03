@@ -11,14 +11,18 @@ fn main() {
     let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X2);
 
 
-    app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { direction: runic::CoarseDirection::X, filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { direction: runic::CoarseDirection::Y, filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F2, runic::CoarseRasterizer { direction: runic::CoarseDirection::Y, filter: runic::BoxFilter::new(-0.5, 0.5) }, runic::UniformSampler { nx: 1, ny: 1 });
-    // app.add_rasterizer(runic::Key::F2, runic::DistanceRasterizer { filter: runic::BoxFilter::new(-0.7, 0.7) }, runic::UniformSampler { nx: 1, ny: 1 });
-    app.add_rasterizer(runic::Key::F3, runic::DistanceRasterizer { filter: runic::RadialBoxFilter { radius: 0.7 } }, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F3, runic::CoarseRasterizer { direction: runic::CoarseDirection::XY, filter: runic::Smoothstep { e0: -0.5, e1: 0.5 } }, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F4, runic::HatiRasterizer { filter: runic::Smoothstep { e0: -0.5, e1: 0.5 } }, runic::UniformSampler { nx: 1, ny: 1 });
+
+    // app.add_rasterizer(runic::Key::F4, runic::DistanceRasterizer { filter: runic::BoxFilter::new(-0.7, 0.7) }, runic::UniformSampler { nx: 1, ny: 1 });
+    // app.add_rasterizer(runic::Key::F3, runic::DistanceRasterizer { filter: runic::RadialBoxFilter { radius: 0.7 } }, runic::UniformSampler { nx: 1, ny: 1 });
     // app.add_rasterizer(runic::Key::F4, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 1, ny: 1 });
     // app.add_rasterizer(runic::Key::F5, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 8, ny: 8 });
     app.add_rasterizer(runic::Key::F6, runic::AnalyticBoxRasterizer, runic::UniformSampler { nx: 1, ny: 1 });
     app.add_rasterizer(runic::Key::F7, runic::DistanceRasterizer { filter: runic::Smoothstep { e0: -0.7, e1: 0.7 } }, runic::UniformSampler { nx: 1, ny: 1 });
+    app.add_rasterizer(runic::Key::F8, runic::GouacheRasterizer { filter: runic::Smoothstep { e0: -0.5, e1: 0.5 } }, runic::UniformSampler { nx: 1, ny: 1 });
 
 
     app.add_scene(runic::Key::Key1, render_scene0);
