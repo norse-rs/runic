@@ -1,4 +1,4 @@
-use crate::{Filter, math::*};
+use crate::{math::*, Filter};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Colorspace {
@@ -27,7 +27,12 @@ impl Frame {
         }
     }
 
-    pub fn reconstruct(&mut self, framebuffer: &Framebuffer, filter: & dyn Filter, transform: &FrameTransform) {
+    pub fn reconstruct(
+        &mut self,
+        framebuffer: &Framebuffer,
+        filter: &dyn Filter,
+        transform: &FrameTransform,
+    ) {
         assert_eq!(self.width, framebuffer.width);
         assert_eq!(self.height, framebuffer.height);
         assert!(framebuffer.is_complete());
@@ -52,7 +57,8 @@ impl Frame {
 
                             let dx = ix as i32 - x as i32;
                             let dy = iy as i32 - y as i32;
-                            let weight = filter.pdf(sample_pos.x() - 0.5 + dx as f32) * filter.pdf(sample_pos.y() - 0.5 + dy as f32); // 2d separable filter
+                            let weight = filter.pdf(sample_pos.x() - 0.5 + dx as f32)
+                                * filter.pdf(sample_pos.y() - 0.5 + dy as f32); // 2d separable filter
 
                             acc_sample += sample * weight;
                             acc_weight += weight;
@@ -79,8 +85,7 @@ impl Frame {
                 } else {
                     y * self.width + x
                 };
-                self.data[i as usize] =
-                    0xFF << 24 | value << 16 | value << 8 | value << 0;
+                self.data[i as usize] = 0xFF << 24 | value << 16 | value << 8 | value << 0;
             }
         }
     }

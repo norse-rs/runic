@@ -1,4 +1,4 @@
-use crate::{Framebuffer};
+use crate::Framebuffer;
 
 pub struct UniformSampler {
     pub nx: usize,
@@ -12,7 +12,8 @@ impl UniformSampler {
 
         for y in 0..self.ny {
             for x in 0..self.nx {
-                framebuffer.add_sample_pos(glam::vec2((x as f32 + 0.5) * dx, (y as f32 + 0.5) * dy));
+                framebuffer
+                    .add_sample_pos(glam::vec2((x as f32 + 0.5) * dx, (y as f32 + 0.5) * dy));
             }
         }
     }

@@ -18,8 +18,12 @@ pub use minifb::*;
 
 pub type Scene = fn(&mut dyn Rasterizer, &mut Framebuffer);
 
-fn transfer_neg_pos(x: f32) -> f32 { x * 0.5 + 0.5 }
-fn transfer_identity(x: f32) -> f32 { x }
+fn transfer_neg_pos(x: f32) -> f32 {
+    x * 0.5 + 0.5
+}
+fn transfer_identity(x: f32) -> f32 {
+    x
+}
 
 pub struct App {
     width: u32,
@@ -79,7 +83,12 @@ impl App {
         }
     }
 
-    pub fn add_rasterizer<R: Rasterizer + 'static>(&mut self, key: Key, rasterizer: R, sampler: UniformSampler) {
+    pub fn add_rasterizer<R: Rasterizer + 'static>(
+        &mut self,
+        key: Key,
+        rasterizer: R,
+        sampler: UniformSampler,
+    ) {
         if self.active_rasterizer.is_none() {
             self.active_rasterizer = Some(self.rasterizers.len());
         }
@@ -104,7 +113,11 @@ impl App {
     }
 
     fn update_frame(&mut self) {
-        match (self.active_rasterizer, self.active_scene, self.active_filter) {
+        match (
+            self.active_rasterizer,
+            self.active_scene,
+            self.active_filter,
+        ) {
             (Some(rasterizer_id), Some(scene_id), Some(filter_id)) => {
                 let (_, rasterizer, sampler) = &mut self.rasterizers[rasterizer_id];
                 let scene = &mut self.scenes[scene_id].1;
@@ -123,7 +136,8 @@ impl App {
                     .reconstruct(&mut self.framebuffer, &**filter, &self.transform);
                 println!("{:?}", start.elapsed());
 
-                self.window.set_title(&format!("{} - Scene {}", rasterizer.name(), scene_id));
+                self.window
+                    .set_title(&format!("{} - Scene {}", rasterizer.name(), scene_id));
             }
             _ => (),
         }
@@ -171,26 +185,32 @@ impl App {
                                     Colorspace::Srgb => Colorspace::Linear,
                                 };
                                 update_frame = true;
-                            },
+                            }
                             Key::F => {
                                 self.transform.flip = !self.transform.flip;
                                 update_frame = true;
-                            },
+                            }
                             Key::T => {
                                 self.transform.transfer = transfer_neg_pos;
                                 update_frame = true;
-                            },
+                            }
                             Key::R => {
                                 self.transform.transfer = transfer_identity;
                                 update_frame = true;
-                            },
+                            }
                             Key::P => {
-                                if let Some(pos) = self.window.get_mouse_pos(minifb::MouseMode::Discard) {
+                                if let Some(pos) =
+                                    self.window.get_mouse_pos(minifb::MouseMode::Discard)
+                                {
                                     let y = pos.1 as usize;
                                     let x = pos.0 as usize;
-                                    println!("pos: {:?} {:?}", pos, (self.frame.data[y * self.width as usize + x] & 0xFF));
+                                    println!(
+                                        "pos: {:?} {:?}",
+                                        pos,
+                                        (self.frame.data[y * self.width as usize + x] & 0xFF)
+                                    );
                                 }
-                            },
+                            }
                             _ => {}
                         }
                     }
