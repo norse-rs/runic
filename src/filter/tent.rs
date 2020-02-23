@@ -1,16 +1,14 @@
-use crate::{RelativeBounds, Filter};
+use crate::{Filter, RelativeBounds};
 
 pub struct TentFilter;
 
 impl Filter for TentFilter {
-    fn name(&self) -> String { "Tent".into() }
+    fn name(&self) -> String {
+        "Tent".into()
+    }
 
     fn pdf(&self, x: f32) -> f32 {
-        let value = if x < 0.0 {
-            1.0 + x
-        } else {
-            1.0 - x
-        };
+        let value = if x < 0.0 { 1.0 + x } else { 1.0 - x };
 
         value.max(0.0)
     }

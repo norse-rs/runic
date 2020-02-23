@@ -1,14 +1,15 @@
 //! Analytic coverage based on distance from circle center.
 
-use crate::{RelativeBounds, Filter, math::*};
-
+use crate::{math::*, Filter, RelativeBounds};
 
 pub struct RadialBoxFilter {
     pub radius: f32,
 }
 
 impl Filter for RadialBoxFilter {
-    fn name(&self) -> String { "RadialBox".into() }
+    fn name(&self) -> String {
+        "RadialBox".into()
+    }
 
     fn pdf(&self, x: f32) -> f32 {
         todo!()
@@ -16,7 +17,7 @@ impl Filter for RadialBoxFilter {
 
     fn cdf(&self, x: f32) -> f32 {
         let d = clamp(-x / self.radius, -1.0, 1.0);
-        let triangle = (1.0 - d*d).sqrt() * d;
+        let triangle = (1.0 - d * d).sqrt() * d;
         let segment = d.acos();
         (segment - triangle) / std::f32::consts::PI
     }

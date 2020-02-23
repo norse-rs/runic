@@ -1,4 +1,4 @@
-use crate::{RelativeBounds, Filter, math::*};
+use crate::{math::*, Filter, RelativeBounds};
 
 pub struct BoxFilter {
     min: f32,
@@ -7,14 +7,14 @@ pub struct BoxFilter {
 
 impl BoxFilter {
     pub fn new(min: f32, max: f32) -> Self {
-        BoxFilter {
-            min, max
-        }
+        BoxFilter { min, max }
     }
 }
 
 impl Filter for BoxFilter {
-    fn name(&self) -> String { "Box".into() }
+    fn name(&self) -> String {
+        "Box".into()
+    }
 
     fn pdf(&self, x: f32) -> f32 {
         if x >= self.min && x <= self.max {

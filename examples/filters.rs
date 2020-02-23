@@ -1,4 +1,4 @@
-use runic::{Rasterizer, BoxFilter, LanzcosFilter, TentFilter};
+use runic::{BoxFilter, LanzcosFilter, Rasterizer, TentFilter};
 
 const WIDTH: u32 = 128;
 const HEIGHT: u32 = 128;
@@ -6,7 +6,13 @@ const HEIGHT: u32 = 128;
 fn main() {
     let mut app = runic::App::new(WIDTH, HEIGHT, runic::Scale::X1);
 
-    app.add_rasterizer(runic::Key::F1, runic::CoarseRasterizer { filter: runic::StepFilter }, runic::UniformSampler { nx: 32, ny: 32 });
+    app.add_rasterizer(
+        runic::Key::F1,
+        runic::CoarseRasterizer {
+            filter: runic::StepFilter,
+        },
+        runic::UniformSampler { nx: 32, ny: 32 },
+    );
 
     app.add_scene(runic::Key::Key1, render_scene0);
 

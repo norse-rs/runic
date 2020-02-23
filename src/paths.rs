@@ -78,7 +78,9 @@ impl Curve {
     pub fn eval(&self, t: f32) -> glam::Vec2 {
         match *self {
             Curve::Line { p0, p1 } => (1.0 - t) * p0 + t * p1,
-            Curve::Quad { p0, p1, p2 } => (1.0 - t) * (1.0 - t) * p0 + 2.0 * t * (1.0 - t) * p1 + t * t * p2,
+            Curve::Quad { p0, p1, p2 } => {
+                (1.0 - t) * (1.0 - t) * p0 + 2.0 * t * (1.0 - t) * p1 + t * t * p2
+            }
         }
     }
 
@@ -115,7 +117,10 @@ impl Curve {
                         let p = self.eval(t);
                         let p10 = Curve::Line { p0, p1 }.eval(t);
                         let p11 = Curve::Line { p0: p1, p1: p2 }.eval(t);
-                        vec![Curve::Quad { p0, p1: p10, p2: p }, Curve::Quad { p0: p, p1: p11, p2 }]
+                        vec![
+                            Curve::Quad { p0, p1: p10, p2: p },
+                            Curve::Quad { p0: p, p1: p11, p2 },
+                        ]
                     }
                     (None, None) => vec![*self],
                 }
@@ -124,7 +129,11 @@ impl Curve {
     }
 
     pub fn monotize_path(curves: &[Curve]) -> Vec<Curve> {
-        curves.iter().map(|curve| curve.monotonize()).flatten().collect()
+        curves
+            .iter()
+            .map(|curve| curve.monotonize())
+            .flatten()
+            .collect()
     }
 }
 

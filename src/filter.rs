@@ -1,19 +1,18 @@
-
-mod box_filter;
 mod bounds;
-mod step;
+mod box_filter;
 mod lanzcos;
-mod tent;
 mod radial_box;
 mod smoothstep;
+mod step;
+mod tent;
 
-pub use self::box_filter::*;
-pub use self::step::*;
 pub use self::bounds::*;
+pub use self::box_filter::*;
 pub use self::lanzcos::*;
-pub use self::tent::*;
 pub use self::radial_box::*;
 pub use self::smoothstep::*;
+pub use self::step::*;
+pub use self::tent::*;
 
 pub trait Filter {
     fn name(&self) -> String;

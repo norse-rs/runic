@@ -1,14 +1,14 @@
+mod analytic_box;
 mod coarse;
 mod distance;
-mod analytic_box;
-mod hati;
 mod gouache;
+mod hati;
 
+pub use analytic_box::*;
 pub use coarse::*;
 pub use distance::*;
-pub use analytic_box::*;
-pub use hati::*;
 pub use gouache::*;
+pub use hati::*;
 
 use crate::{Curve, Extent, FillRect, Framebuffer, Offset, Rect, Segment};
 

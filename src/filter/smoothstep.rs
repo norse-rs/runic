@@ -1,4 +1,4 @@
-use crate::{RelativeBounds, Filter, math::*};
+use crate::{math::*, Filter, RelativeBounds};
 
 pub struct Smoothstep {
     pub e0: f32,
@@ -12,12 +12,14 @@ impl Smoothstep {
 }
 
 impl Filter for Smoothstep {
-    fn name(&self) -> String { "Smoothstep".into() }
+    fn name(&self) -> String {
+        "Smoothstep".into()
+    }
 
     fn pdf(&self, x: f32) -> f32 {
         let t = self.t(x);
         if t >= 0.0 && t <= 1.0 {
-            6.0 * (t - t*t)
+            6.0 * (t - t * t)
         } else {
             0.0
         }
@@ -25,7 +27,11 @@ impl Filter for Smoothstep {
 
     fn cdf(&self, x: f32) -> f32 {
         let t = self.t(x);
-        if t < 0.0 { 0.0 } else if 1.0 <= t { 1.0 }else {
+        if t < 0.0 {
+            0.0
+        } else if 1.0 <= t {
+            1.0
+        } else {
             3.0 * t * t - 2.0 * t * t * t
         }
     }

@@ -4,7 +4,7 @@ use std::ops::RangeInclusive;
 #[derive(Debug, Clone)]
 pub struct Bounds {
     pub x: RangeInclusive<u32>,
-    pub y: RangeInclusive<u32>
+    pub y: RangeInclusive<u32>,
 }
 
 #[derive(Debug, Clone)]

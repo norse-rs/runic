@@ -1,4 +1,4 @@
-use crate::{RelativeBounds, Filter};
+use crate::{Filter, RelativeBounds};
 
 pub struct LanzcosFilter {
     pub a: f32,
@@ -12,7 +12,9 @@ impl LanzcosFilter {
 }
 
 impl Filter for LanzcosFilter {
-    fn name(&self) -> String { format!("Lanzcos {}", self.a) }
+    fn name(&self) -> String {
+        format!("Lanzcos {}", self.a)
+    }
 
     fn pdf(&self, x: f32) -> f32 {
         if x == 0.0 {
